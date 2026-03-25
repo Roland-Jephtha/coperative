@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}CoopSaaS - Modern Cooperative Management{% endblock %}
+
+{% block layout %}
+<div class="bg-white">
+  <!-- Header -->
+  <header class="absolute inset-x-0 top-0 z-50">
+    <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+      <div class="flex lg:flex-1">
+        <a href="#" class="-m-1.5 p-1.5 flex items-center gap-x-3">
+          <svg class="h-8 w-8 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          <span class="text-xl font-bold font-display tracking-tight text-slate-900">CoopSaaS</span>
+        </a>
+      </div>
+      <div class="hidden lg:flex lg:gap-x-12">
+        <a href="#features" class="text-sm font-semibold leading-6 text-slate-900 hover:text-primary-600 transition-colors">Features</a>
+        <a href="#how-it-works" class="text-sm font-semibold leading-6 text-slate-900 hover:text-primary-600 transition-colors">How it Works</a>
+        <a href="#pricing" class="text-sm font-semibold leading-6 text-slate-900 hover:text-primary-600 transition-colors">Pricing</a>
+      </div>
+      <div class="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4 lg:items-center">
+        <a href="{% url 'accounts:login' %}" class="text-sm font-semibold leading-6 text-slate-900 hover:text-primary-600">Log in</a>
+        {% url 'cooperatives:register' as register_url %}
+        {% include "components/button.html" with type="primary" text="Start Free Trial" url=register_url %}
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero section -->
+    <div class="relative isolate pt-14">
+      <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
+        <div class="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]" style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"></div>
+      </div>
+      <div class="py-24 sm:py-32 lg:pb-40">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+          <div class="mx-auto max-w-2xl text-center">
+            <h1 class="text-4xl font-bold font-display tracking-tight text-slate-900 sm:text-6xl">Modern Cooperative Management Platform</h1>
+            <p class="mt-6 text-lg leading-8 text-slate-600">Manage members, savings, and loans effortlessly with a secure digital cooperative system. Scale your cooperative like a modern SaaS business.</p>
+            <div class="mt-10 flex items-center justify-center gap-x-6">
+              {% url 'cooperatives:register' as register_url_hero %}
+              {% include "components/button.html" with type="primary" text="Start Free Trial" url=register_url_hero %}
+              <a href="{% url 'cooperatives:register' %}" class="text-sm font-semibold leading-6 text-slate-900 flex items-center gap-x-2 group">
+                Request Demo <span aria-hidden="true" class="group-hover:translate-x-1 transition-transform">→</span>
+              </a>
+            </div>
+          </div>
+          <div class="mt-16 flow-root sm:mt-24">
+            <div class="-m-2 rounded-xl bg-slate-900/5 p-2 ring-1 ring-inset ring-slate-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
+              <!-- Placeholder for SaaS Dashboard Image -->
+              <div class="bg-white rounded-md shadow-2xl ring-1 ring-slate-900/10 h-[400px] w-full flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-slate-100 flex flex-col pt-8 px-8">
+                    <div class="h-4 w-48 bg-slate-200 rounded-md mb-8"></div>
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="h-32 bg-white rounded-xl shadow-sm border border-slate-100 p-6"></div>
+                        <div class="h-32 bg-white rounded-xl shadow-sm border border-slate-100 p-6"></div>
+                        <div class="h-32 bg-white rounded-xl shadow-sm border border-slate-100 p-6"></div>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div id="features" class="py-24 sm:py-32 bg-slate-50">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto max-w-2xl lg:text-center">
+                <h2 class="text-base font-semibold leading-7 text-primary-600">Faster Workflows</h2>
+                <p class="mt-2 text-3xl font-bold font-display tracking-tight text-slate-900 sm:text-4xl">Everything you need to manage funds</p>
+                <p class="mt-6 text-lg leading-8 text-slate-600">End-to-end management for micro-finance institutions and cooperatives. Eliminate Excel sheets forever.</p>
+            </div>
+            <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+                <dl class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+                    <div class="flex flex-col">
+                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary-600">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372c1.764 0 3.308-.501 4.121-.952A4.125 4.125 0 0014.093 15H9.907a4.125 4.125 0 00-7.533 2.493c.813.451 2.357.952 4.121.952a9.38 9.38 0 002.625-.372" /></svg>
+                            </div>
+                            Member Management
+                        </dt>
+                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600">
+                            <p class="flex-auto">Easily onboard members with dedicated self-service portals, roles, and automated notifications.</p>
+                        </dd>
+                    </div>
+                    <div class="flex flex-col">
+                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary-600">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75m0 0v-9.75c0-.621-.504-1.125-1.125-1.125h-5.25m-6.75 12h5.25A1.125 1.125 0 0015.375 15v-5.25m-6.75 5.25V5.625c0-.621.504-1.125 1.125-1.125h5.25" /></svg>
+                            </div>
+                            Loan Engine
+                        </dt>
+                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600">
+                            <p class="flex-auto">Automated repayment schedules based on Flat or Reducing Balance with 1-click approvals.</p>
+                        </dd>
+                    </div>
+                    <div class="flex flex-col">
+                        <dt class="flex items-center gap-x-3 text-base font-semibold leading-7 text-slate-900">
+                            <div class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary-600">
+                                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" /></svg>
+                            </div>
+                            Financial Reporting
+                        </dt>
+                        <dd class="mt-4 flex flex-auto flex-col text-base leading-7 text-slate-600">
+                            <p class="flex-auto">Real-time charts forecasting contributions vs defaults directly on your Command Dashboard.</p>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing -->
+    <div id="pricing" class="py-24 sm:py-32">
+        <div class="mx-auto max-w-7xl px-6 lg:px-8">
+            <div class="mx-auto max-w-2xl sm:text-center">
+                <h2 class="text-3xl font-bold font-display tracking-tight text-slate-900 sm:text-4xl">Simple, transparent pricing</h2>
+                <p class="mt-6 text-lg leading-8 text-slate-600">Pay-as-you-grow plans configured specifically for the aggregate number of active members logged into your system.</p>
+            </div>
+            <div class="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-slate-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none hover:shadow-xl transition-shadow bg-white">
+                <div class="p-8 sm:p-10 lg:flex-auto">
+                    <h3 class="text-2xl font-bold font-display tracking-tight text-slate-900">Pro Plan</h3>
+                    <p class="mt-6 text-base leading-7 text-slate-600">Unlock full automated scheduling, email alerts, and infinite historical ledger retention.</p>
+                    <div class="mt-10 flex items-center gap-x-4">
+                        <h4 class="flex-none text-sm font-semibold leading-6 text-primary-600">What's included</h4>
+                        <div class="h-px flex-auto bg-slate-100"></div>
+                    </div>
+                    <ul role="list" class="mt-8 grid grid-cols-1 gap-4 text-sm leading-6 text-slate-600 sm:grid-cols-2 sm:gap-6">
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-primary-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg>Unlimited Members</li>
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-primary-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg>Admin Audit Logs</li>
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-primary-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg>Member Dashboards</li>
+                        <li class="flex gap-x-3"><svg class="h-6 w-5 flex-none text-primary-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg>Automated Export PDF</li>
+                    </ul>
+                </div>
+                <div class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:flex-shrink-0">
+                    <div class="rounded-2xl bg-slate-50 py-10 text-center ring-1 ring-inset ring-slate-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16 h-full">
+                        <div class="mx-auto max-w-xs px-8">
+                            <p class="text-base font-semibold text-slate-600">Starting at</p>
+                            <p class="mt-6 flex items-baseline justify-center gap-x-2">
+                                <span class="text-5xl font-bold font-display tracking-tight text-slate-900">$29</span>
+                                <span class="text-sm font-semibold leading-6 tracking-wide text-slate-600">/mo</span>
+                            </p>
+                            <a href="{% url 'cooperatives:register' %}" class="mt-10 block w-full rounded-md bg-primary-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-primary-500 transition-colors">Get Started Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </main>
+  
+  <footer class="bg-white px-6 lg:px-8 py-12 border-t border-slate-200 flex justify-between items-center flex-col sm:flex-row gap-4">
+    <p class="text-sm leading-5 text-slate-500">© 2026 CoopSaaS Inc. All rights reserved.</p>
+    <div class="flex gap-6">
+        <a href="#" class="text-sm leading-6 text-slate-600 hover:text-slate-900">About</a>
+        <a href="#" class="text-sm leading-6 text-slate-600 hover:text-slate-900">Privacy Policy</a>
+    </div>
+  </footer>
+</div>
+{% endblock %}

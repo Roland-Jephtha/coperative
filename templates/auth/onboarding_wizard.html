@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+{% block title %}Cooperative Setup — CoopSaaS{% endblock %}
+
+{% block layout %}
+<div class="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8" x-data="{ 
+    step: 1, 
+    totalSteps: 7,
+    saving: false,
+    nextStep() { if(this.step < this.totalSteps) this.step++ },
+    prevStep() { if(this.step > 1) this.step-- }
+}">
+    <div class="max-w-3xl mx-auto">
+        <!-- Progress Bar -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary-600 bg-primary-200">
+                    Setup Progress
+                </span>
+                <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary-600">
+                    Step <span x-text="step"></span> of 7
+                </span>
+            </div>
+            <div class="overflow-hidden h-2 mb-4 text-xs flex rounded bg-primary-100">
+                <div :style="`width: ${(step/totalSteps)*100}%`" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-600 transition-all duration-500"></div>
+            </div>
+        </div>
+
+        <form method="post" action="" @submit="saving = true" class="bg-white shadow-xl rounded-2xl overflow-hidden border border-slate-200">
+            {% csrf_token %}
+            
+            <!-- Step 1: Contribution Settings -->
+            <div x-show="step === 1" x-transition class="p-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Contribution Settings</h2>
+                    <p class="text-slate-500">Configure how members save in your cooperative.</p>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Contribution Frequency</label>
+                        <select name="contribution_type" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                            {% for val, label in contribution_types %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Default Contribution Amount (₦)</label>
+                        <input type="number" name="default_contribution_amount" value="10000" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-50 p-4 rounded-xl">
+                        <input type="checkbox" name="allow_custom_contributions" id="allow_custom" checked class="h-4 w-4 text-primary-600 focus:ring-primary-600 border-slate-300 rounded">
+                        <label for="allow_custom" class="text-sm font-medium text-slate-700">Allow members to contribute more than default amount</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Loan Interest -->
+            <div x-show="step === 2" x-transition x-cloak class="p-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Loan Interest Settings</h2>
+                    <p class="text-slate-500">Set the default interest rates for loans.</p>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Default Interest Rate (%)</label>
+                        <input type="number" step="0.01" name="default_loan_interest_rate" value="10.00" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Calculation Method</label>
+                        <select name="interest_calculation_type" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                            {% for val, label in interest_types %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Loan Limits & Duration -->
+            <div x-show="step === 3" x-transition x-cloak class="p-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Loan Limits & Duration</h2>
+                    <p class="text-slate-500">Define the borrowing boundaries.</p>
+                </div>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Min Loan Amount (₦)</label>
+                        <input type="number" name="min_loan_amount" value="5000" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Max Loan Amount (₦)</label>
+                        <input type="number" name="max_loan_amount" value="1000000" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Min Duration (Months)</label>
+                        <input type="number" name="min_loan_duration_months" value="1" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Max Duration (Months)</label>
+                        <input type="number" name="max_loan_duration_months" value="12" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Eligibility & Repayment -->
+            <div x-show="step === 4" x-transition x-cloak class="p-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Eligibility & Repayment</h2>
+                    <p class="text-slate-500">When can members borrow and how do they pay back?</p>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Eligibility Rule</label>
+                        <select name="loan_eligibility_type" x-model="eligibility" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                            {% for val, label in eligibility_types %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Min Contribution Months Required</label>
+                        <input type="number" name="min_contribution_months_required" value="6" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                    </div>
+                    <div class="grid grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Repayment Frequency</label>
+                            <select name="repayment_frequency" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                                {% for val, label in repayment_frequencies %}
+                                <option value="{{ val }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Grace Period (Days)</label>
+                            <input type="number" name="grace_period_days" value="7" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Penalties & Advanced -->
+            <div x-show="step === 5" x-transition x-cloak class="p-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Late Payment Penalty</h2>
+                    <p class="text-slate-500">Settings for overdue loan repayments.</p>
+                </div>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Penalty Type</label>
+                            <select name="penalty_type" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                                {% for val, label in penalty_types %}
+                                <option value="{{ val }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Penalty Value</label>
+                            <input type="number" step="0.01" name="penalty_value" value="2.00" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Penalty Frequency</label>
+                        <select name="penalty_frequency" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                            {% for val, label in penalty_frequencies %}
+                            <option value="{{ val }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="space-y-4 pt-4 border-t border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="allow_early_repayment" id="early_repay" checked class="h-4 w-4 text-primary-600 focus:ring-primary-600 border-slate-300 rounded">
+                            <label for="early_repay" class="text-sm font-medium text-slate-700">Allow early loan repayment</label>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="apply_early_repayment_discount" id="early_discount" class="h-4 w-4 text-primary-600 focus:ring-primary-600 border-slate-300 rounded">
+                            <label for="early_discount" class="text-sm font-medium text-slate-700">Apply discount for early repayment</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 6: Bank Details & Savings Interest -->
+            <div x-show="step === 6" x-transition x-cloak class="p-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Bank Details & Savings</h2>
+                    <p class="text-slate-500">Configure where members pay and saving rewards.</p>
+                </div>
+                <div class="space-y-6">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="col-span-2">
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Bank Name</label>
+                            <input type="text" name="bank_name" placeholder="e.g. Zenith Bank" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Account Number</label>
+                            <input type="text" name="account_number" placeholder="10 digits" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Account Name</label>
+                            <input type="text" name="account_name" placeholder="Cooperative Name" class="block w-full rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="pt-6 border-t border-slate-100">
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Annual Savings Interest Rate (%)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="number" step="0.01" name="savings_interest_rate" value="0.00" class="block w-32 rounded-lg border-0 py-2.5 px-4 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm">
+                            <span class="text-xs text-slate-500">How much interest members earn on their savings annually.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 7: Summary -->
+            <div x-show="step === 7" x-transition x-cloak class="p-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Summary & Finalize</h2>
+                    <p class="text-slate-500">Review your cooperative configuration.</p>
+                </div>
+                <div class="bg-slate-50 rounded-2xl p-6 space-y-4 border border-slate-200">
+                    <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                        <span class="text-sm text-slate-500 uppercase tracking-wider font-bold">Cooperative</span>
+                        <span class="font-bold text-slate-900">{{ cooperative.name }}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-y-4 text-sm">
+                        <span class="text-slate-500">Contribution Type:</span>
+                        <span class="font-semibold text-right" x-text="document.getElementsByName('contribution_type')[0].options[document.getElementsByName('contribution_type')[0].selectedIndex].text"></span>
+                        
+                        <span class="text-slate-500">Interest Rate:</span>
+                        <span class="font-semibold text-right"><span x-text="document.getElementsByName('default_loan_interest_rate')[0].value"></span>%</span>
+                        
+                        <span class="text-slate-500">Late Penalty:</span>
+                        <span class="font-semibold text-right" x-text="document.getElementsByName('penalty_value')[0].value + (document.getElementsByName('penalty_type')[0].value === 'PERCENTAGE' ? '%' : ' ₦')"></span>
+                    </div>
+                </div>
+                <div class="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-200 flex gap-3">
+                    <svg class="h-5 w-5 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+                    <p class="text-xs text-amber-700">These settings will be applied to all members and loan products. You can adjust them later in the settings menu.</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="px-8 py-6 bg-slate-50 border-t border-slate-200 flex justify-between">
+                <button type="button" x-show="step > 1" @click="prevStep()" :disabled="saving" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50">
+                    Previous
+                </button>
+                <div class="ml-auto flex gap-3">
+                    <button type="button" x-show="step < totalSteps" @click="nextStep()" class="inline-flex items-center px-6 py-2.5 text-sm font-semibold text-white bg-primary-600 rounded-lg hover:bg-primary-500 transition-colors shadow-sm">
+                        Next Step
+                    </button>
+                    <button type="submit" x-show="step === totalSteps" :disabled="saving" class="inline-flex items-center px-8 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-500 transition-colors shadow-sm disabled:opacity-75 disabled:cursor-not-allowed gap-2">
+                        <svg x-show="saving" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span x-text="saving ? 'Applying Settings...' : 'Finish Setup'"></span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

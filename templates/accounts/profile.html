@@ -1,0 +1,94 @@
+{% extends 'dashboard_base.html' %}
+
+{% block extra_head %}
+{{ block.super }}
+<style type="text/tailwindcss">
+    @layer components {
+        .django-form input:not([type="checkbox"]):not([type="hidden"]),
+        .django-form select,
+        .django-form textarea {
+            @apply block w-full rounded-lg border-0 py-2.5 px-3.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm bg-white transition-all duration-200 outline-none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="md:flex md:items-center md:justify-between mb-8">
+    <div class="min-w-0 flex-1">
+        <h2 class="text-2xl font-bold font-display text-slate-900">Your Profile</h2>
+        <p class="mt-2 text-sm text-slate-500">Manage your personal details and contact information.</p>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+    <!-- Profile Avatar Card -->
+    <div class="lg:col-span-1">
+        <div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 p-8 text-center">
+            <div class="mx-auto h-24 w-24 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-4xl font-display mb-4">
+                {{ user.username|make_list|first|upper }}
+            </div>
+            <h3 class="text-lg font-semibold text-slate-900">{{ user.get_full_name|default:user.username }}</h3>
+            <p class="text-sm text-slate-500 mt-1">{{ user.email }}</p>
+            <span class="inline-flex mt-3 items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-600/10">
+                {{ user.get_role_display }}
+            </span>
+            {% if user.cooperative %}
+            <div class="mt-4 pt-4 border-t border-slate-100">
+                <p class="text-xs text-slate-400 uppercase tracking-wide font-medium">Cooperative</p>
+                <p class="text-sm font-semibold text-slate-700 mt-1">{{ user.cooperative.name }}</p>
+            </div>
+            {% endif %}
+            <div class="mt-4 pt-4 border-t border-slate-100 text-left space-y-2">
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-500">Member Since</span>
+                    <span class="font-medium text-slate-700">{{ user.join_date|default:user.date_joined|date:"M Y" }}</span>
+                </div>
+                <div class="flex items-center justify-between text-sm">
+                    <span class="text-slate-500">Status</span>
+                    {% if user.is_active_member %}
+                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">Active</span>
+                    {% else %}
+                    <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Form Card -->
+    <div class="lg:col-span-2">
+        <div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
+            <div class="border-b border-slate-900/10 bg-slate-50/50 px-8 py-5">
+                <h3 class="text-base font-semibold leading-7 text-slate-900">Personal Information</h3>
+                <p class="mt-1 text-sm leading-6 text-slate-500">Update your name, email, and contact details.</p>
+            </div>
+            <form method="post" action="" class="django-form px-8 py-8">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="rounded-xl bg-red-50 p-4 mb-6 ring-1 ring-red-500/20">
+                    <p class="text-sm font-medium text-red-800">{{ form.non_field_errors }}</p>
+                </div>
+                {% endif %}
+                <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
+                    {% for field in form %}
+                    <div class="group">
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold leading-6 text-slate-900 group-focus-within:text-primary-600 transition-colors">
+                            {{ field.label }}{% if field.field.required %} <span class="text-primary-600">*</span>{% endif %}
+                        </label>
+                        <div class="mt-2">{{ field }}</div>
+                        {% if field.errors %}
+                        <p class="mt-1 text-sm text-red-500">{{ field.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="mt-8 flex items-center justify-end gap-x-4 border-t border-slate-900/10 pt-6">
+                    <a href="javascript:history.back()" class="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-all">Cancel</a>
+                    <button type="submit" class="rounded-lg bg-primary-600 px-8 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 transition-all">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

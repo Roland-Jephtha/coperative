@@ -1,0 +1,25 @@
+{% if messages %}
+<div class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none">
+    {% for message in messages %}
+    <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+         x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="pointer-events-auto rounded-lg p-4 shadow-lg ring-1 ring-black ring-opacity-5 w-80 flex items-center gap-3
+         {% if message.tags == 'success' %} bg-white border-l-4 border-green-500 {% elif message.tags == 'error' %} bg-white border-l-4 border-red-500 {% else %} bg-slate-800 text-white {% endif %}
+         ">
+         <div class="flex-1 text-sm font-medium {% if not message.tags == 'error' and not message.tags == 'success' %}text-white{% else %}text-slate-900{% endif %}">
+            {{ message }}
+         </div>
+         <button @click="show = false" class="text-slate-400 hover:text-slate-500 p-1">
+             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+             </svg>
+         </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

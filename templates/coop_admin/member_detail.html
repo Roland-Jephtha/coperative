@@ -1,0 +1,297 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav class="flex mb-6" aria-label="Breadcrumb">
+    <ol class="flex items-center gap-2 text-sm">
+        <li><a href="{% url 'cooperatives:admin_dashboard' %}" class="text-slate-400 hover:text-slate-600">Dashboard</a></li>
+        <li><span class="text-slate-300">/</span></li>
+        <li><a href="{% url 'members:coop_list' %}" class="text-slate-400 hover:text-slate-600">Members</a></li>
+        <li><span class="text-slate-300">/</span></li>
+        <li class="text-slate-900 font-medium truncate max-w-xs">{{ member.get_full_name|default:member.username }}</li>
+    </ol>
+</nav>
+
+<!-- Profile Header -->
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden mb-6">
+    <div class="h-24 bg-gradient-to-r from-secondary-600 via-indigo-600 to-white-600"></div>
+    <div class="px-6 pb-6">
+        <div class="flex flex-col sm:flex-row sm:items-end gap-4 -mt-12">
+            <div class="h-24 w-24 rounded-2xl flex items-center justify-center font-bold text-3xl font-display ring-4 ring-white shadow-md
+                {% if member.is_suspended %}bg-rose-200 text-rose-800{% else %}bg-primary-100 text-primary-700{% endif %}">
+                {{ member.first_name|make_list|first|upper }}{{ member.last_name|make_list|first|upper }}
+            </div>
+            <div class="sm:flex-1 pt-2">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                        <h1 class="text-2xl font-bold font-display text-slate-900">{{ member.get_full_name|default:member.username }}</h1>
+                        <p class="text-sm text-slate-500">Member ID #{{ member.pk }} &bull; {{ member.email }}</p>
+                        <div class="flex flex-wrap gap-2 mt-2">
+                            {% if member.is_suspended %}
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20">
+                                <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524L13.477 14.89zm1.414-1.413L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clip-rule="evenodd"/></svg>
+                                Suspended
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20">
+                                <svg class="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd"/></svg>
+                                Active
+                            </span>
+                            {% endif %}
+                            {% if member.gender %}<span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{{ member.get_gender_display }}</span>{% endif %}
+                        </div>
+                    </div>
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-2" x-data="{ suspendModal: false }">
+                        <a href="{% url 'members:edit' member.pk %}" class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50 transition-colors">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                            Edit
+                        </a>
+                        <a href="{% url 'contributions:coop_list' %}" class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-emerald-700 ring-1 ring-emerald-300 hover:bg-emerald-50 transition-colors">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                            Record Contribution
+                        </a>
+                        <a href="{% url 'loans:coop_list' %}" class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-blue-700 ring-1 ring-blue-300 hover:bg-blue-50 transition-colors">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M2.25 18.75v-9.75c0-.621.504-1.125 1.125-1.125h5.25"/></svg>
+                            View Loans
+                        </a>
+                        {% if member.is_suspended %}
+                        <form method="post" action="{% url 'members:activate' member.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-emerald-700 bg-emerald-600 text-white hover:bg-emerald-500 transition-colors">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Reactivate
+                            </button>
+                        </form>
+                        {% else %}
+                        <button type="button" @click="suspendModal = true" class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-500 transition-colors">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            Suspend
+                        </button>
+                        <!-- Suspend Confirm Modal -->
+                        <div x-show="suspendModal" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4" x-transition.opacity>
+                            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="suspendModal = false"></div>
+                            <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-auto p-6 sm:p-8 max-h-[90vh] overflow-y-auto" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+                                <div class="flex items-start gap-4 mb-5">
+                                    <div class="h-12 w-12 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+                                        <svg class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="text-lg font-semibold text-slate-900">Suspend Member</h3>
+                                        <p class="text-sm text-slate-500 break-words">Are you sure you want to suspend <strong>{{ member.get_full_name }}</strong>?</p>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-slate-600 bg-rose-50 rounded-lg p-4 ring-1 ring-rose-200 mb-6 break-words">This member will lose login access and all cooperative privileges immediately. You can reactivate them at any time.</p>
+                                <div class="flex gap-3 justify-end">
+                                    <button type="button" @click="suspendModal = false" class="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50">Cancel</button>
+                                    <form method="post" action="{% url 'members:suspend' member.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-rose-500">Confirm Suspension</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div x-data="{ tab: 'info' }" class="space-y-6">
+    <div class="border-b border-slate-200 bg-white rounded-t-xl overflow-hidden">
+        <nav class="flex gap-1 px-4 pt-3">
+            {% for t, label in tab_items %}{% endfor %}
+            <button @click="tab = 'info'" :class="tab === 'info' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'" class="whitespace-nowrap border-b-2 pb-3 pt-1 px-3 text-sm font-semibold transition-colors">Personal Info</button>
+            <button @click="tab = 'contributions'" :class="tab === 'contributions' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'" class="whitespace-nowrap border-b-2 pb-3 pt-1 px-3 text-sm font-semibold transition-colors">Contributions</button>
+            <button @click="tab = 'loans'" :class="tab === 'loans' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'" class="whitespace-nowrap border-b-2 pb-3 pt-1 px-3 text-sm font-semibold transition-colors">Loans</button>
+            <button @click="tab = 'repayments'" :class="tab === 'repayments' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'" class="whitespace-nowrap border-b-2 pb-3 pt-1 px-3 text-sm font-semibold transition-colors">Repayments</button>
+            <button @click="tab = 'activity'" :class="tab === 'activity' ? 'border-primary-600 text-primary-600' : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'" class="whitespace-nowrap border-b-2 pb-3 pt-1 px-3 text-sm font-semibold transition-colors">Activity</button>
+        </nav>
+    </div>
+
+    <!-- Tab: Personal Info -->
+    <div x-show="tab === 'info'" x-transition.opacity>
+        <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-900/5 p-6">
+            <h3 class="text-base font-semibold text-slate-900 mb-6">Basic Information</h3>
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {% for label, value in member_info %}{% endfor %}
+                <div><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">First Name</dt><dd class="mt-1 text-sm text-slate-900">{{ member.first_name|default:"—" }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Last Name</dt><dd class="mt-1 text-sm text-slate-900">{{ member.last_name|default:"—" }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Username / ID</dt><dd class="mt-1 text-sm text-slate-900">{{ member.username }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Email</dt><dd class="mt-1 text-sm text-slate-900">{{ member.email|default:"—" }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Phone</dt><dd class="mt-1 text-sm text-slate-900">{{ member.phone|default:"—" }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Gender</dt><dd class="mt-1 text-sm text-slate-900">{{ member.get_gender_display|default:"—" }}</dd></div>
+                <div class="sm:col-span-2"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Address</dt><dd class="mt-1 text-sm text-slate-900">{{ member.address|default:"—" }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Joined</dt><dd class="mt-1 text-sm text-slate-900">{{ member.joined_at|date:"F j, Y — g:i A"|default:member.date_joined|date:"F j, Y" }}</dd></div>
+                <div><dt class="text-xs font-semibold uppercase tracking-wide text-slate-400">Account Status</dt>
+                    <dd class="mt-1">
+                        {% if member.is_suspended %}
+                        <span class="inline-flex rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 ring-1 ring-rose-600/20">Suspended</span>
+                        {% else %}
+                        <span class="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-600/20">Active</span>
+                        {% endif %}
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+
+    <!-- Tab: Contributions -->
+    <div x-show="tab === 'contributions'" x-transition.opacity>
+        <!-- Summary Cards -->
+        <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5">
+                <dd class="text-2xl font-bold font-display text-emerald-600">₦{{ total_contributions|floatformat:2 }}</dd>
+                <dt class="text-sm text-slate-500 mt-1">Total Contributions</dt>
+            </div>
+            <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5">
+                <dd class="text-2xl font-bold font-display text-slate-900">{{ contributions|length }}</dd>
+                <dt class="text-sm text-slate-500 mt-1">Total Transactions</dt>
+            </div>
+            <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5">
+                <dd class="text-2xl font-bold font-display text-slate-900">
+                    {% if last_contribution %}{{ last_contribution.contribution_date|date:"N j" }}{% else %}—{% endif %}
+                </dd>
+                <dt class="text-sm text-slate-500 mt-1">Last Contribution</dt>
+            </div>
+        </dl>
+        <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
+                        <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Recorded By</th>
+                        <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Reference</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for c in contributions %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3.5 pl-6 text-sm text-slate-700">{{ c.contribution_date|date:"N j, Y" }}</td>
+                        <td class="px-3 py-3.5 text-right text-sm font-mono font-semibold text-emerald-600">+₦{{ c.amount }}</td>
+                        <td class="px-3 py-3.5 text-sm text-slate-500">{{ c.recorded_by.get_full_name|default:"—" }}</td>
+                        <td class="px-3 py-3.5 pr-6 text-sm font-mono text-slate-400">{{ c.payment_reference|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="py-10 text-center text-sm text-slate-400">No contributions recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab: Loans -->
+    <div x-show="tab === 'loans'" x-transition.opacity>
+        <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5">
+                <dd class="text-2xl font-bold font-display text-blue-600">{{ active_loans|length }}</dd>
+                <dt class="text-sm text-slate-500 mt-1">Active Loans</dt>
+            </div>
+            <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5">
+                <dd class="text-2xl font-bold font-display text-slate-900">{{ loans|length }}</dd>
+                <dt class="text-sm text-slate-500 mt-1">Total Loans Taken</dt>
+            </div>
+            <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5">
+                <dd class="text-2xl font-bold font-display text-rose-600">₦{{ total_outstanding|floatformat:2 }}</dd>
+                <dt class="text-sm text-slate-500 mt-1">Outstanding Balance</dt>
+            </div>
+        </dl>
+        <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Rate</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Duration</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                        <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for loan in loans %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3.5 pl-6 text-sm font-mono font-semibold text-slate-900">₦{{ loan.amount }}</td>
+                        <td class="px-3 py-3.5 text-sm text-slate-500">{{ loan.interest_rate }}% ({{ loan.interest_type }})</td>
+                        <td class="px-3 py-3.5 text-sm text-slate-500">{{ loan.duration_months }} months</td>
+                        <td class="px-3 py-3.5">
+                            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset
+                                {% if loan.status == 'ACTIVE' %}bg-blue-50 text-blue-700 ring-blue-600/20
+                                {% elif loan.status == 'COMPLETED' %}bg-emerald-50 text-emerald-700 ring-emerald-600/20
+                                {% elif loan.status == 'DEFAULTED' %}bg-rose-50 text-rose-700 ring-rose-600/20
+                                {% elif loan.status == 'PENDING' %}bg-amber-50 text-amber-700 ring-amber-600/20
+                                {% else %}bg-slate-50 text-slate-600 ring-slate-600/20{% endif %}">
+                                {{ loan.get_status_display }}
+                            </span>
+                        </td>
+                        <td class="px-3 py-3.5 pr-6 text-sm text-slate-500">{{ loan.application_date|date:"N j, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="py-10 text-center text-sm text-slate-400">No loans found for this member.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab: Repayments -->
+    <div x-show="tab === 'repayments'" x-transition.opacity>
+        <div class="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-900/5 mb-6">
+            <dd class="text-2xl font-bold font-display text-emerald-600">₦{{ total_repaid|floatformat:2 }}</dd>
+            <dt class="text-sm text-slate-500 mt-1">Total Amount Repaid</dt>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
+            <table class="min-w-full divide-y divide-slate-200">
+                <thead class="bg-slate-50">
+                    <tr>
+                        <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Payment Date</th>
+                        <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Amount Paid</th>
+                        <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Remaining Balance</th>
+                        <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Loan #</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for r in repayments %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3.5 pl-6 text-sm text-slate-700">{{ r.payment_date|date:"N j, Y" }}</td>
+                        <td class="px-3 py-3.5 text-right text-sm font-mono font-semibold text-emerald-600">+₦{{ r.amount_paid }}</td>
+                        <td class="px-3 py-3.5 text-right text-sm font-mono text-rose-600">₦{{ r.balance_remaining }}</td>
+                        <td class="px-3 py-3.5 pr-6 text-sm text-slate-400">#{{ r.loan_id }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="py-10 text-center text-sm text-slate-400">No repayments recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tab: Activity Timeline -->
+    <div x-show="tab === 'activity'" x-transition.opacity>
+        <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-900/5 p-6">
+            <h3 class="text-base font-semibold text-slate-900 mb-6">Activity Timeline</h3>
+            {% if activity %}
+            <ol class="relative border-l border-slate-200 ml-3 space-y-8">
+                {% for log in activity %}
+                <li class="ml-6">
+                    <span class="absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full bg-primary-100 ring-4 ring-white">
+                        <svg class="h-3 w-3 text-primary-600" fill="currentColor" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4"/></svg>
+                    </span>
+                    <p class="text-sm font-medium text-slate-900">{{ log.action_performed }}</p>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ log.timestamp|date:"N j, Y — g:i A" }}{% if log.user %} by {{ log.user.get_full_name }}{% endif %}</p>
+                </li>
+                {% endfor %}
+            </ol>
+            {% else %}
+            <div class="text-center py-12">
+                <svg class="mx-auto h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <p class="mt-2 text-sm text-slate-400">No activity has been logged for this member yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

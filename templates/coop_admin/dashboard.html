@@ -1,0 +1,251 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-2xl font-bold font-display leading-9 tracking-tight text-slate-900"><span class="font-extrabold uppercase text-primary-600">{{ request.user.cooperative.name }}</span> Dashboard</h1>
+    <p class="mt-1 text-sm text-slate-600">Performance and aggregate data breakdown for your cooperative.</p>
+</div>
+
+<!-- Key Performance Indicators (Cards) -->
+<dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Active Members Card -->
+    <div class="relative overflow-hidden rounded-xl bg-white px-4 pb-12 pt-5 shadow-sm ring-1 ring-slate-900/5 sm:px-6 sm:pt-6 transition-all hover:shadow-md group">
+        <dt>
+            <div class="absolute rounded-md bg-primary-50 p-3 group-hover:bg-primary-100 transition-colors">
+                <svg class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+            </div>
+            <p class="ml-16 truncate text-sm font-medium text-slate-500">Active Members</p>
+        </dt>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
+            <p class="text-2xl font-semibold font-display text-slate-900">{{ members_count|default:"0" }}</p>
+            <p class="ml-2 flex items-baseline text-sm font-semibold text-emerald-600">
+                {% comment %} <svg class="h-4 w-4 flex-shrink-0 self-center text-emerald-500" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z" clip-rule="evenodd" />
+                </svg>
+                <span class="sr-only"> Increased by </span>
+                12 {% endcomment %}
+            </p>
+            <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6">
+                <div class="text-sm">
+                    <a href="{% url 'members:coop_list' %}" class="font-medium text-primary-600 hover:text-primary-500">View all<span class="sr-only"> members counts</span></a>
+                </div>
+            </div>
+        </dd>
+    </div>
+
+    <!-- Total Contributions Card -->
+    <div class="relative overflow-hidden rounded-xl bg-white px-4 pb-12 pt-5 shadow-sm ring-1 ring-slate-900/5 sm:px-6 sm:pt-6 transition-all hover:shadow-md group">
+        <dt>
+            <div class="absolute rounded-md bg-emerald-50 p-3 group-hover:bg-emerald-100 transition-colors">
+                <svg class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <p class="ml-16 truncate text-sm font-medium text-slate-500">Total Reserve (Contributions)</p>
+        </dt>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
+            <p class="text-2xl font-semibold font-display text-slate-900">₦{{ total_contributions|default:"0.00" }}</p>
+            <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6">
+                <div class="text-sm">
+                    <a href="{% url 'contributions:coop_list' %}" class="font-medium text-emerald-600 hover:text-emerald-500">View ledger<span class="sr-only"> ledger view</span></a>
+                </div>
+            </div>
+        </dd>
+    </div>
+
+    <!-- Active Loans Card -->
+    <div class="relative overflow-hidden rounded-xl bg-white px-4 pb-12 pt-5 shadow-sm ring-1 ring-slate-900/5 sm:px-6 sm:pt-6 transition-all hover:shadow-md group">
+        <dt>
+            <div class="absolute rounded-md bg-blue-50 p-3 group-hover:bg-blue-100 transition-colors">
+                <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75m0 0v-9.75c0-.621-.504-1.125-1.125-1.125h-5.25m-6.75 12h5.25A1.125 1.125 0 0015.375 15v-5.25m-6.75 5.25V5.625c0-.621.504-1.125 1.125-1.125h5.25" />
+                </svg>
+            </div>
+            <p class="ml-16 truncate text-sm font-medium text-slate-500">Active Loans Principal</p>
+        </dt>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
+            <p class="text-2xl font-semibold font-display text-slate-900">₦{{ active_loans_total|default:"0.00" }}</p>
+            <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6">
+                <div class="text-sm">
+                    <a href="{% url 'loans:coop_list' %}" class="font-medium text-blue-600 hover:text-blue-500">View schedules<span class="sr-only"> schedules</span></a>
+                </div>
+            </div>
+        </dd>
+    </div>
+
+    <!-- Defaulter Risk Card -->
+    <div class="relative overflow-hidden rounded-xl bg-white px-4 pb-12 pt-5 shadow-sm ring-1 ring-slate-900/5 sm:px-6 sm:pt-6 transition-all hover:shadow-md group">
+        <dt>
+            <div class="absolute rounded-md bg-rose-50 p-3 group-hover:bg-rose-100 transition-colors">
+                <svg class="h-6 w-6 text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <p class="ml-16 truncate text-sm font-medium text-slate-500">Outstanding Defaults</p>
+        </dt>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
+            <p class="text-2xl font-semibold font-display text-slate-900">₦0.00</p>
+            <p class="ml-2 flex items-baseline text-sm font-semibold text-emerald-600">
+                Healthy
+            </p>
+            <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6">
+                <div class="text-sm">
+                    <a href="{% url 'loans:coop_list' %}?status=delinquent" class="font-medium text-rose-600 hover:text-rose-500">View delinquencies<span class="sr-only"> defaults</span></a>
+                </div>
+            </div>
+        </dd>
+    </div>
+</dl>
+
+<!-- Action Required (Only show if there are pending items) -->
+{% if total_pending_actions > 0 %}
+<div class="mt-8">
+    <div class="rounded-xl bg-amber-50 border border-amber-200 p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="flex-shrink-0 bg-amber-100 p-2 rounded-lg">
+                <svg class="h-6 w-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-lg font-bold text-amber-900">Action Required</h2>
+                <p class="text-sm text-amber-700">You have {{ total_pending_actions }} transactions awaiting verification.</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% if pending_contributions_count > 0 %}
+            <a href="{% url 'contributions:coop_list' %}" class="flex items-center justify-between p-4 bg-white rounded-lg border border-amber-200 hover:border-amber-400 transition-colors group">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600 font-bold text-sm">{{ pending_contributions_count }}</span>
+                    <span class="text-sm font-semibold text-slate-700">Pending Savings Deposits</span>
+                </div>
+                <svg class="h-5 w-5 text-slate-400 group-hover:text-amber-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
+            {% endif %}
+            {% if pending_repayments_count > 0 %}
+            <a href="{% url 'loans:coop_list' %}" class="flex items-center justify-between p-4 bg-white rounded-lg border border-amber-200 hover:border-amber-400 transition-colors group">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 text-amber-600 font-bold text-sm">{{ pending_repayments_count }}</span>
+                    <span class="text-sm font-semibold text-slate-700">Pending Loan Repayments</span>
+                </div>
+                <svg class="h-5 w-5 text-slate-400 group-hover:text-amber-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Charts Section -->
+<div class="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
+    <!-- Monthly Contributions Trend -->
+    <div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-900/5 p-6">
+        <h3 class="text-base font-semibold leading-6 text-slate-900 mb-4">Contribution Growth (YTD)</h3>
+        <div class="relative h-48 w-full">
+            <canvas id="contributionsChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Loan Disbursement vs Repayment -->
+    <div class="overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-slate-900/5 p-6">
+        <h3 class="text-base font-semibold leading-6 text-slate-900 mb-4">Repayment Health</h3>
+        <div class="relative h-48 w-full">
+            <canvas id="repaymentsChart"></canvas>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart Config Setup for Tailwind colors consistency
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748b';
+        Chart.defaults.scale.grid.color = '#f1f5f9';
+
+        // Decode JSON data from Django safely
+        const contribLabels = {{ contrib_labels|safe|default:"[]" }};
+        const contribData = {{ contrib_data|safe|default:"[]" }};
+
+        // Contributions Chart
+        const ctxContrib = document.getElementById('contributionsChart').getContext('2d');
+        new Chart(ctxContrib, {
+            type: 'line',
+            data: {
+                labels: contribLabels.length ? contribLabels : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Monthly Net Deposits (₦)',
+                    data: contribData.length ? contribData : [0, 0, 0, 0, 0, 0],
+                    borderColor: '#0ea5e9',
+                    backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#0ea5e9',
+                    pointRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        padding: 12,
+                        titleFont: { size: 13, weight: '600' },
+                        bodyFont: { size: 13 }
+                    }
+                },
+                scales: {
+                    y: { beginAtZero: true, border: { display: false } },
+                    x: { border: { display: false }, grid: { display: false } }
+                }
+            }
+        });
+
+        // Repayments Chart (Doughnut/Bar)
+        const repayLabels = {{ repay_labels|safe|default:"[]" }};
+        const expectedData = {{ repay_expected|safe|default:"[]" }};
+        const collectedData = {{ repay_collected|safe|default:"[]" }};
+
+        const ctxRepay = document.getElementById('repaymentsChart').getContext('2d');
+        new Chart(ctxRepay, {
+            type: 'bar',
+            data: {
+                labels: repayLabels.length ? repayLabels : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [
+                    {
+                        label: 'Principal Expected',
+                        data: expectedData.length ? expectedData : [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#94a3b8',
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'Actual Collected',
+                        data: collectedData.length ? collectedData : [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#10b981',
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
+                },
+                scales: {
+                    y: { beginAtZero: true, stacked: false, border: { display: false } },
+                    x: { stacked: false, border: { display: false }, grid: { display: false } }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

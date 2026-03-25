@@ -1,0 +1,77 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-2xl font-bold font-display leading-9 tracking-tight text-slate-900">Platform Command Center</h1>
+    <p class="mt-1 text-sm text-slate-600">Global SaaS overview for tracking tenant cooperatives and subscriptions.</p>
+</div>
+
+<!-- Super Admin Metrics -->
+<dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+    <!-- Total Cooperatives -->
+    <div class="relative overflow-hidden rounded-xl bg-slate-900 px-4 pb-12 pt-5 shadow-lg sm:px-6 sm:pt-6 transition-all hover:shadow-xl group">
+        <dt>
+            <div class="absolute rounded-md bg-white/10 p-3 group-hover:bg-white/20 transition-colors">
+                <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-2.25A2.25 2.25 0 0111.25 16.5h1.5a2.25 2.25 0 012.25 2.25V21" />
+                </svg>
+            </div>
+            <p class="ml-16 truncate text-sm font-medium text-slate-300">Registered Cooperatives</p>
+        </dt>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
+            <p class="text-3xl font-bold font-display text-white">{{ cooperatives_count|default:"8" }}</p>
+            <div class="absolute inset-x-0 bottom-0 bg-white/5 px-4 py-4 sm:px-6 border-t border-white/10">
+                <div class="text-sm">
+                    <a href="{% url 'cooperatives:super_list' %}" class="font-medium text-white hover:text-slate-200">View tenants</a>
+                </div>
+            </div>
+        </dd>
+    </div>
+
+    <!-- Monthly Recurring Revenue -->
+    <div class="relative overflow-hidden rounded-xl bg-white px-4 pb-12 pt-5 shadow-sm ring-1 ring-slate-900/5 sm:px-6 sm:pt-6 transition-all hover:shadow-md group">
+        <dt>
+            <div class="absolute rounded-md bg-primary-50 p-3 group-hover:bg-primary-100 transition-colors">
+                <svg class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <p class="ml-16 truncate text-sm font-medium text-slate-500">Global MRR</p>
+        </dt>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
+            <p class="text-3xl font-bold font-display text-slate-900">${{ mrr_estimate|default:"1,240.00" }}</p>
+            <p class="ml-2 flex items-baseline text-sm font-semibold text-emerald-600">
+                +14%
+            </p>
+            <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6 border-t border-slate-100">
+                <div class="text-sm">
+                    <a href="{% url 'subscriptions:super_list' %}" class="font-medium text-primary-600 hover:text-primary-500">View billing</a>
+                </div>
+            </div>
+        </dd>
+    </div>
+
+    <!-- Server Health -->
+    <div class="relative overflow-hidden rounded-xl bg-white px-4 pb-12 pt-5 shadow-sm ring-1 ring-slate-900/5 sm:px-6 sm:pt-6 transition-all hover:shadow-md group">
+        <dt>
+            <div class="absolute rounded-md bg-emerald-50 p-3 group-hover:bg-emerald-100 transition-colors">
+                <svg class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008z" />
+                </svg>
+            </div>
+            <p class="ml-16 truncate text-sm font-medium text-slate-500">System Status</p>
+        </dt>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
+            <p class="text-3xl font-bold font-display text-slate-900">99.9%</p>
+            <p class="ml-2 flex items-baseline text-sm font-semibold text-emerald-600">
+                Uptime
+            </p>
+            <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6 border-t border-slate-100">
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-emerald-600 hover:text-emerald-500">All systems operational</a>
+                </div>
+            </div>
+        </dd>
+    </div>
+</dl>
+{% endblock %}

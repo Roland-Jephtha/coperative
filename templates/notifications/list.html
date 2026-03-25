@@ -1,0 +1,65 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">Notifications</h2>
+        {% if unread_notifications_count > 0 %}
+        <form action="{% url 'notifications:mark_all_read' %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                Mark all as read
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {% for notification in notifications %}
+        <div class="border-b last:border-0 border-gray-50 p-4 hover:bg-gray-50 transition-colors {% if not notification.is_read %}bg-blue-50/30{% endif %}">
+            <div class="flex justify-between items-start gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        {% if not notification.is_read %}
+                        <span class="w-2 h-2 bg-blue-600 rounded-full"></span>
+                        {% endif %}
+                        <h3 class="font-bold text-gray-900">{{ notification.title }}</h3>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-2">{{ notification.message }}</p>
+                    <div class="flex items-center gap-4 text-xs text-gray-400">
+                        <span>{{ notification.created_at|timesince }} ago</span>
+                        {% if notification.link and not notification.is_read %}
+                        <a href="{% url 'notifications:mark_read' notification.pk %}" class="text-blue-600 hover:underline">
+                            View details
+                        </a>
+                        {% elif notification.link %}
+                         <a href="{{ notification.link }}" class="hover:underline">View details</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="p-12 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-4 text-gray-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+            </div>
+            <p class="text-gray-500">No notifications yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="mt-6 flex justify-center gap-2">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Previous</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

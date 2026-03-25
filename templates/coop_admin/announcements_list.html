@@ -1,0 +1,63 @@
+{% extends 'dashboard_base.html' %}
+
+{% block content %}
+<div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+        <h1 class="text-2xl font-bold font-display leading-6 text-slate-900">Cooperative Announcements</h1>
+        <p class="mt-2 text-sm text-slate-600">Broadcast important messages and notices to all members of your cooperative.</p>
+    </div>
+    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-3">
+        {% url 'announcements:add' as add_url %}
+        {% include "components/button.html" with type="primary" text="New Announcement" url=add_url %}
+    </div>
+</div>
+
+<div class="mt-8 flow-root">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-xl bg-white">
+                <ul role="list" class="divide-y divide-slate-100">
+                    {% for announcement in announcements %}
+                    <li class="relative flex justify-between gap-x-6 px-4 py-5 hover:bg-slate-50 sm:px-6 transition-colors">
+                        <div class="flex min-w-0 gap-x-4">
+                            <div class="min-w-0 flex-auto">
+                                <p class="text-sm font-semibold leading-6 text-slate-900">
+                                    <a href="#">
+                                        <span class="absolute inset-x-0 -top-px bottom-0"></span>
+                                        {{ announcement.title }}
+                                    </a>
+                                </p>
+                                <p class="mt-1 flex text-xs leading-5 text-slate-500">
+                                    {{ announcement.message|truncatewords:20 }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex shrink-0 items-center gap-x-4">
+                            <div class="hidden sm:flex sm:flex-col sm:items-end">
+                                <p class="text-sm leading-6 text-slate-900">{{ announcement.created_by.get_full_name|default:announcement.created_by.username }}</p>
+                                <p class="mt-1 text-xs leading-5 text-slate-500">Posted on <time datetime="{{ announcement.created_at|date:'Y-m-d' }}">{{ announcement.created_at|date:"M d, Y" }}</time></p>
+                            </div>
+                            <svg class="h-5 w-5 flex-none text-slate-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="px-4 py-12 text-center text-sm text-slate-500 sm:px-6">
+                        <svg class="mx-auto h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.34 15.84c-.688-.06-1.386-.121-2.082-.182C5.905 15.36 3 12.597 3 9.775V9A6.75 6.75 0 019.75 2.25h.5A6.75 6.75 0 0117 9v.775c0 2.822-2.904 5.584-5.258 5.883m-1.402 3.161c-1.35.158-2.704.298-4.062.42A42.126 42.126 0 013 18.75v-1.125a1.5 1.5 0 011.5-1.5h15.25c.828 0 1.5.672 1.5 1.5v1.125c0 1.157-.311 2.279-.882 3.25-.568-.962-1.31-1.847-2.18-2.618M11.25 10.5v2.25m0 0h2.25m-2.25 0H9" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-semibold text-slate-900">No announcements yet</h3>
+                        <p class="mt-1 text-sm text-slate-500">Keep your members informed by posting the first announcement.</p>
+                        <div class="mt-6">
+                            {% url 'announcements:add' as add_url %}
+                            {% include "components/button.html" with type="primary" text="Post Announcement" url=add_url %}
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
