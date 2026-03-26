@@ -20,6 +20,7 @@ class Loan(models.Model):
     status = models.CharField(max_length=20, choices=LoanStatus.choices, default=LoanStatus.PENDING)
     application_date = models.DateField(auto_now_add=True)
     approval_date = models.DateField(null=True, blank=True)
+    proof_of_payment = models.ImageField(upload_to='loan_proofs/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     @property

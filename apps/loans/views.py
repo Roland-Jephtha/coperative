@@ -1,7 +1,7 @@
 from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from .models import Loan, LoanStatus
 from apps.cooperatives.views import CoopAdminRequiredMixin
 from apps.accounts.models import UserRole
@@ -16,7 +16,7 @@ class CooperativeLoansView(LoginRequiredMixin, CoopAdminRequiredMixin, ListView)
         return Loan.objects.filter(cooperative=self.request.user.cooperative).order_by('-created_at')
 
 from django.views.generic.edit import CreateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 
 class LoanCreateView(LoginRequiredMixin, CoopAdminRequiredMixin, CreateView):
     model = Loan
@@ -77,7 +77,7 @@ class MemberLoanCreateView(LoginRequiredMixin, MemberRequiredMixin, CreateView):
                 user=admin,
                 title="New Loan Application",
                 message=f"{self.request.user.get_full_name()} has applied for a loan of ₦{form.instance.amount:,}.",
-                link=f"/loans/management/"
+                link=reverse('loans:coop_list')
             )
         return response
     
@@ -124,7 +124,7 @@ class ApproveLoanView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
                 user=loan.member,
                 title="Loan Approved",
                 message=f"Your loan request for ₦{loan.amount:,} has been approved.",
-                link=f"/repayments/loan/{loan.id}/schedule/"
+                link=reverse('loans:member_list')
             )
             
             messages.success(request, f"Loan for {loan.member.get_full_name()} has been approved and schedule generated.")
@@ -135,6 +135,8 @@ class DisburseLoanView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
         loan = get_object_or_404(Loan, id=loan_id, cooperative=request.user.cooperative)
         if loan.status == LoanStatus.APPROVED:
             loan.status = LoanStatus.ACTIVE
+            if 'proof_of_payment' in request.FILES:
+                loan.proof_of_payment = request.FILES['proof_of_payment']
             loan.save()
             
             # Notify Member
@@ -142,7 +144,7 @@ class DisburseLoanView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
                 user=loan.member,
                 title="Loan Disbursed",
                 message=f"Your loan of ₦{loan.amount:,} has been disbursed and is now ACTIVE.",
-                link=f"/repayments/loan/{loan.id}/schedule/"
+                link=reverse('loans:schedule', kwargs={'loan_id': loan.id})
             )
             
             messages.success(request, f"Loan for {loan.member.get_full_name()} has been marked as ACTIVE (Disbursed).")
@@ -160,7 +162,7 @@ class RejectLoanView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
                 user=loan.member,
                 title="Loan Rejected",
                 message=f"Your loan request for ₦{loan.amount:,} has been rejected.",
-                link=f"/loans/member/"
+                link=reverse('loans:member_list')
             )
             
             messages.warning(request, f"Loan for {loan.member.get_full_name()} has been rejected.")

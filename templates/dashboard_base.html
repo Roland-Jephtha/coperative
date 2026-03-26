@@ -30,7 +30,9 @@
     </div>
 
     <!-- Static sidebar for desktop -->
-    {% include "components/sidebar.html" %}
+    <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+        {% include "components/sidebar.html" %}
+    </div>
 
     <div class="lg:pl-72 flex flex-col h-full">
         <!-- Top Navigation -->
@@ -45,4 +47,84 @@
         </main>
     </div>
 </div>
+
+<!-- Pusher Real-time Notifications -->
+<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+<script>
+    const PUSHER_KEY = "{{ pusher_key|default:'' }}";
+    const PUSHER_CLUSTER = "{{ pusher_cluster|default:'mt1' }}";
+    const USER_ID = "{{ user.id }}";
+
+    if (PUSHER_KEY && USER_ID) {
+        const pusher = new Pusher(PUSHER_KEY, {
+            cluster: PUSHER_CLUSTER
+        });
+
+        const channel = pusher.subscribe(`user-${USER_ID}`);
+        channel.bind('new-notification', function(data) {
+            console.log('New notification received:', data);
+
+            // 1. Alert Icon Animation
+            const bellIcon = document.getElementById('notification-bell-icon');
+            if (bellIcon) {
+                bellIcon.classList.add('animate-swing');
+            }
+
+            // 2. Show/Update Red Dot Badge
+            let badge = document.getElementById('notification-badge');
+            if (!badge) {
+                const bellBtn = document.getElementById('notification-bell-btn');
+                if (bellBtn) {
+                    const badgeHtml = `
+                        <span id="notification-badge" class="absolute top-2 right-2 flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
+                        </span>
+                    `;
+                    bellBtn.insertAdjacentHTML('beforeend', badgeHtml);
+                }
+            }
+
+            // 3. Update Count Badge
+            const countBadge = document.getElementById('notification-count-badge');
+            if (countBadge) {
+                let currentText = countBadge.textContent.trim();
+                let currentCount = parseInt(currentText) || 0;
+                countBadge.textContent = (currentCount + 1) + ' new';
+                countBadge.classList.remove('hidden');
+            }
+
+            // 4. Add to Dropdown List
+            const listContainer = document.getElementById('notification-dropdown-list');
+            if (listContainer) {
+                // Remove empty message if exists
+                const emptyMsg = document.getElementById('no-notifications-msg');
+                if (emptyMsg) emptyMsg.remove();
+
+                const newNotifHtml = `
+                    <a href="${data.link}" class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 border-b border-slate-50 bg-slate-50/50">
+                        <div class="flex items-start gap-2">
+                            <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600"></span>
+                            <div>
+                                <p class="text-slate-900 font-semibold">${data.title}</p>
+                                <p class="text-xs mt-0.5 line-clamp-2">${data.message}</p>
+                                <p class="text-[10px] text-slate-400 mt-1">Just now</p>
+                            </div>
+                        </div>
+                    </a>
+                `;
+                listContainer.insertAdjacentHTML('afterbegin', newNotifHtml);
+            }
+            
+            // 5. Toast Alert (Pop-up message)
+            window.dispatchEvent(new CustomEvent('notify', {
+                detail: {
+                    type: 'info',
+                    title: data.title,
+                    message: data.message
+                }
+            }));
+        });
+    }
+</script>
 {% endblock %}

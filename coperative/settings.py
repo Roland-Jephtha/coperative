@@ -142,3 +142,16 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"
+
+# Pusher Settings
+import os
+# PUSHER_APP_ID = os.environ.get("PUSHER_APP_ID", "")
+# PUSHER_KEY = os.environ.get("PUSHER_KEY", "")
+# PUSHER_SECRET = os.environ.get("PUSHER_SECRET", "")
+# PUSHER_CLUSTER = os.environ.get("PUSHER_CLUSTER", "mt1")
+
+
+PUSHER_APP_ID="2132912"
+PUSHER_KEY="fb72264a6fe5667e4e4f"
+PUSHER_SECRET="877f75a6afb017959933"
+PUSHER_CLUSTER="mt1"

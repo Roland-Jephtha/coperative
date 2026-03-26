@@ -43,8 +43,8 @@ class MemberDashboardView(LoginRequiredMixin, MemberRequiredMixin, TemplateView)
             'cooperative': coop,
             'total_contributions': f"{total_contributions:,.2f}",
             'active_loan_balance': f"{active_loan_balance:,.2f}",
-            'recent_contributions': contributions[:5],
-            'announcements': announcements,
+            'recent_contributions': contributions[:3],
+            'announcements': announcements[:2],
             'target_announcement': target_announcement,
         })
         return context

@@ -56,6 +56,13 @@
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
                                 <div class="font-medium text-slate-900">{{ loan.member.get_full_name|default:loan.member.username }}</div>
                                 <div class="text-xs text-slate-500 mt-0.5">Applied: {{ loan.application_date|date:"N j, Y" }}</div>
+                                <div class="text-xs text-slate-500 mt-1">
+                                    {% if loan.member.bank_name %}
+                                        <span class="font-semibold text-slate-700">{{ loan.member.bank_name }}:</span> {{ loan.member.account_number }} ({{ loan.member.account_name }})
+                                    {% else %}
+                                        <span class="text-rose-500 italic">No bank details provided</span>
+                                    {% endif %}
+                                </div>
                             </td>
                              <td class="whitespace-nowrap px-3 py-4 text-sm text-right font-mono font-medium text-slate-900">
                                  ₦{{ loan.amount|floatformat:2|intcomma }}
@@ -101,10 +108,14 @@
                                         </button>
                                     </form>
                                     {% elif loan.status == 'APPROVED' %}
-                                    <form action="{% url 'loans:disburse' loan.id %}" method="POST" class="inline">
+                                    <form action="{% url 'loans:disburse' loan.id %}" method="POST" enctype="multipart/form-data" class="flex flex-col items-end gap-2 p-2 bg-slate-50 rounded-md border border-slate-200">
                                         {% csrf_token %}
-                                        <button type="submit" class="inline-flex items-center gap-1.5 rounded-md bg-primary-600 px-2 py-1 text-xs font-semibold text-white shadow-sm hover:bg-primary-500 transition-colors">
-                                            Disburse
+                                        <div class="flex flex-col items-end">
+                                            <span class="text-[10px] text-slate-500 uppercase font-bold mb-1">Proof of Payment</span>
+                                            <input type="file" name="proof_of_payment" class="text-xs text-slate-500 w-full max-w-[150px] file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100" required>
+                                        </div>
+                                        <button type="submit" class="inline-flex items-center gap-1.5 rounded-md bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-primary-500 transition-colors">
+                                            Confirm Disbursal
                                         </button>
                                     </form>
                                     {% endif %}

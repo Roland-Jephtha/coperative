@@ -15,7 +15,7 @@ class CooperativeContributionsView(LoginRequiredMixin, CoopAdminRequiredMixin, L
         return Contribution.objects.filter(cooperative=self.request.user.cooperative).order_by('-contribution_date')
 
 from django.views.generic.edit import CreateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 import uuid
 
 class ContributionCreateView(LoginRequiredMixin, CoopAdminRequiredMixin, CreateView):
@@ -41,7 +41,7 @@ class ContributionCreateView(LoginRequiredMixin, CoopAdminRequiredMixin, CreateV
             user=form.instance.member,
             title="Savings Recorded",
             message=f"Management has recorded a savings deposit of ₦{form.instance.amount:,} to your account.",
-            link="/contributions/member/"
+            link=reverse('contributions:member_list')
         )
         return response
     
@@ -83,7 +83,7 @@ class MemberContributionCreateView(LoginRequiredMixin, MemberRequiredMixin, Crea
                 user=admin,
                 title="New Savings Deposit",
                 message=f"{self.request.user.get_full_name()} has recorded a savings deposit of ₦{form.instance.amount:,}.",
-                link="/contributions/management/"
+                link=reverse('contributions:coop_list')
             )
         return response
 
@@ -103,7 +103,7 @@ class ApproveContributionView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
                 user=contribution.member,
                 title="Savings Deposit Approved",
                 message=f"Your savings deposit of ₦{contribution.amount:,} has been approved.",
-                link="/contributions/member/"
+                link=reverse('contributions:member_list')
             )
             
             messages.success(request, f"Contribution for {contribution.member.get_full_name()} has been approved.")
@@ -121,7 +121,7 @@ class RejectContributionView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
                 user=contribution.member,
                 title="Savings Deposit Rejected",
                 message=f"Your savings deposit of ₦{contribution.amount:,} has been rejected.",
-                link="/contributions/member/"
+                link=reverse('contributions:member_list')
             )
             
             messages.warning(request, f"Contribution for {contribution.member.get_full_name()} has been rejected.")

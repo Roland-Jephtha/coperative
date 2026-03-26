@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from .models import LoanRepayment, TransactionStatus
 from apps.accounts.models import UserRole
@@ -34,8 +34,9 @@ class MemberLoanRepaymentCreateView(LoginRequiredMixin, MemberRequiredMixin, Cre
                 user=admin,
                 title="New Loan Repayment",
                 message=f"{self.request.user.get_full_name()} has recorded a repayment of ₦{form.instance.amount_paid:,} for Loan #{form.instance.loan.id}.",
-                link=f"/repayments/loan/{form.instance.loan.id}/schedule/"
+                link=reverse('loans:schedule', kwargs={'loan_id': form.instance.loan.id})
             )
+
         return response
 
     def get_success_url(self):
@@ -59,7 +60,7 @@ class ApproveLoanRepaymentView(LoginRequiredMixin, CoopAdminRequiredMixin, View)
                 user=repayment.loan.member,
                 title="Repayment Approved",
                 message=f"Your loan repayment of ₦{repayment.amount_paid:,} has been approved.",
-                link=f"/repayments/loan/{repayment.loan.id}/schedule/"
+                link=reverse('loans:schedule', kwargs={'loan_id': repayment.loan.id})
             )
             
             messages.success(request, f"Repayment of ₦{repayment.amount_paid} for {repayment.loan.member.get_full_name()} has been approved.")
@@ -77,7 +78,7 @@ class RejectLoanRepaymentView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
                 user=repayment.loan.member,
                 title="Repayment Rejected",
                 message=f"Your loan repayment of ₦{repayment.amount_paid:,} has been rejected.",
-                link=f"/repayments/loan/{repayment.loan.id}/schedule/"
+                link=reverse('loans:schedule', kwargs={'loan_id': repayment.loan.id})
             )
             
             messages.warning(request, f"Repayment for {repayment.loan.member.get_full_name()} has been rejected.")

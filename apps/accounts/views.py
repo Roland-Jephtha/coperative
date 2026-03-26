@@ -49,8 +49,12 @@ class CustomPasswordChangeDoneView(LoginRequiredMixin, auth_views.PasswordChange
 
 class ProfileView(LoginRequiredMixin, UpdateView):
     template_name = 'accounts/profile.html'
-    fields = ['first_name', 'last_name', 'email', 'phone', 'address']
+    fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'gender', 'bank_name', 'account_number', 'account_name']
     success_url = reverse_lazy('accounts:profile')
 
     def get_object(self, queryset=None):
         return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "Profile updated successfully!")
+        return super().form_valid(form)

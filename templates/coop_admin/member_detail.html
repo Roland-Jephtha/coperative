@@ -159,28 +159,30 @@
             </div>
         </dl>
         <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-50">
-                    <tr>
-                        <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
-                        <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
-                        <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Recorded By</th>
-                        <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Reference</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    {% for c in contributions %}
-                    <tr class="hover:bg-slate-50">
-                        <td class="py-3.5 pl-6 text-sm text-slate-700">{{ c.contribution_date|date:"N j, Y" }}</td>
-                        <td class="px-3 py-3.5 text-right text-sm font-mono font-semibold text-emerald-600">+₦{{ c.amount }}</td>
-                        <td class="px-3 py-3.5 text-sm text-slate-500">{{ c.recorded_by.get_full_name|default:"—" }}</td>
-                        <td class="px-3 py-3.5 pr-6 text-sm font-mono text-slate-400">{{ c.payment_reference|default:"—" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="4" class="py-10 text-center text-sm text-slate-400">No contributions recorded yet.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
+                            <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
+                            <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Recorded By</th>
+                            <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Reference</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for c in contributions %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-3.5 pl-6 text-sm text-slate-700">{{ c.contribution_date|date:"N j, Y" }}</td>
+                            <td class="px-3 py-3.5 text-right text-sm font-mono font-semibold text-emerald-600">+₦{{ c.amount }}</td>
+                            <td class="px-3 py-3.5 text-sm text-slate-500">{{ c.recorded_by.get_full_name|default:"—" }}</td>
+                            <td class="px-3 py-3.5 pr-6 text-sm font-mono text-slate-400">{{ c.payment_reference|default:"—" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="py-10 text-center text-sm text-slate-400">No contributions recorded yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -201,39 +203,41 @@
             </div>
         </dl>
         <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-50">
-                    <tr>
-                        <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
-                        <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Rate</th>
-                        <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Duration</th>
-                        <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                        <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    {% for loan in loans %}
-                    <tr class="hover:bg-slate-50">
-                        <td class="py-3.5 pl-6 text-sm font-mono font-semibold text-slate-900">₦{{ loan.amount }}</td>
-                        <td class="px-3 py-3.5 text-sm text-slate-500">{{ loan.interest_rate }}% ({{ loan.interest_type }})</td>
-                        <td class="px-3 py-3.5 text-sm text-slate-500">{{ loan.duration_months }} months</td>
-                        <td class="px-3 py-3.5">
-                            <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset
-                                {% if loan.status == 'ACTIVE' %}bg-blue-50 text-blue-700 ring-blue-600/20
-                                {% elif loan.status == 'COMPLETED' %}bg-emerald-50 text-emerald-700 ring-emerald-600/20
-                                {% elif loan.status == 'DEFAULTED' %}bg-rose-50 text-rose-700 ring-rose-600/20
-                                {% elif loan.status == 'PENDING' %}bg-amber-50 text-amber-700 ring-amber-600/20
-                                {% else %}bg-slate-50 text-slate-600 ring-slate-600/20{% endif %}">
-                                {{ loan.get_status_display }}
-                            </span>
-                        </td>
-                        <td class="px-3 py-3.5 pr-6 text-sm text-slate-500">{{ loan.application_date|date:"N j, Y" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="5" class="py-10 text-center text-sm text-slate-400">No loans found for this member.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Amount</th>
+                            <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Rate</th>
+                            <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Duration</th>
+                            <th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
+                            <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for loan in loans %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-3.5 pl-6 text-sm font-mono font-semibold text-slate-900">₦{{ loan.amount }}</td>
+                            <td class="px-3 py-3.5 text-sm text-slate-500">{{ loan.interest_rate }}% ({{ loan.interest_type }})</td>
+                            <td class="px-3 py-3.5 text-sm text-slate-500">{{ loan.duration_months }} months</td>
+                            <td class="px-3 py-3.5">
+                                <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset
+                                    {% if loan.status == 'ACTIVE' %}bg-blue-50 text-blue-700 ring-blue-600/20
+                                    {% elif loan.status == 'COMPLETED' %}bg-emerald-50 text-emerald-700 ring-emerald-600/20
+                                    {% elif loan.status == 'DEFAULTED' %}bg-rose-50 text-rose-700 ring-rose-600/20
+                                    {% elif loan.status == 'PENDING' %}bg-amber-50 text-amber-700 ring-amber-600/20
+                                    {% else %}bg-slate-50 text-slate-600 ring-slate-600/20{% endif %}">
+                                    {{ loan.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-3 py-3.5 pr-6 text-sm text-slate-500">{{ loan.application_date|date:"N j, Y" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" class="py-10 text-center text-sm text-slate-400">No loans found for this member.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -244,28 +248,30 @@
             <dt class="text-sm text-slate-500 mt-1">Total Amount Repaid</dt>
         </div>
         <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
-            <table class="min-w-full divide-y divide-slate-200">
-                <thead class="bg-slate-50">
-                    <tr>
-                        <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Payment Date</th>
-                        <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Amount Paid</th>
-                        <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Remaining Balance</th>
-                        <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Loan #</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    {% for r in repayments %}
-                    <tr class="hover:bg-slate-50">
-                        <td class="py-3.5 pl-6 text-sm text-slate-700">{{ r.payment_date|date:"N j, Y" }}</td>
-                        <td class="px-3 py-3.5 text-right text-sm font-mono font-semibold text-emerald-600">+₦{{ r.amount_paid }}</td>
-                        <td class="px-3 py-3.5 text-right text-sm font-mono text-rose-600">₦{{ r.balance_remaining }}</td>
-                        <td class="px-3 py-3.5 pr-6 text-sm text-slate-400">#{{ r.loan_id }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr><td colspan="4" class="py-10 text-center text-sm text-slate-400">No repayments recorded yet.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="py-3.5 pl-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Payment Date</th>
+                            <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Amount Paid</th>
+                            <th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Remaining Balance</th>
+                            <th class="px-3 py-3.5 pr-6 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Loan #</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for r in repayments %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="py-3.5 pl-6 text-sm text-slate-700">{{ r.payment_date|date:"N j, Y" }}</td>
+                            <td class="px-3 py-3.5 text-right text-sm font-mono font-semibold text-emerald-600">+₦{{ r.amount_paid }}</td>
+                            <td class="px-3 py-3.5 text-right text-sm font-mono text-rose-600">₦{{ r.balance_remaining }}</td>
+                            <td class="px-3 py-3.5 pr-6 text-sm text-slate-400">#{{ r.loan_id }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="py-10 text-center text-sm text-slate-400">No repayments recorded yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 

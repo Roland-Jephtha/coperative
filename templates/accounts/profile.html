@@ -1,94 +1,126 @@
 {% extends 'dashboard_base.html' %}
 
-{% block extra_head %}
-{{ block.super }}
-<style type="text/tailwindcss">
-    @layer components {
-        .django-form input:not([type="checkbox"]):not([type="hidden"]),
-        .django-form select,
-        .django-form textarea {
-            @apply block w-full rounded-lg border-0 py-2.5 px-3.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm bg-white transition-all duration-200 outline-none;
-        }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="md:flex md:items-center md:justify-between mb-8">
-    <div class="min-w-0 flex-1">
-        <h2 class="text-2xl font-bold font-display text-slate-900">Your Profile</h2>
-        <p class="mt-2 text-sm text-slate-500">Manage your personal details and contact information.</p>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-    <!-- Profile Avatar Card -->
-    <div class="lg:col-span-1">
-        <div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 p-8 text-center">
-            <div class="mx-auto h-24 w-24 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-4xl font-display mb-4">
-                {{ user.username|make_list|first|upper }}
-            </div>
-            <h3 class="text-lg font-semibold text-slate-900">{{ user.get_full_name|default:user.username }}</h3>
-            <p class="text-sm text-slate-500 mt-1">{{ user.email }}</p>
-            <span class="inline-flex mt-3 items-center rounded-full bg-primary-50 px-3 py-1 text-xs font-medium text-primary-700 ring-1 ring-inset ring-primary-600/10">
-                {{ user.get_role_display }}
-            </span>
-            {% if user.cooperative %}
-            <div class="mt-4 pt-4 border-t border-slate-100">
-                <p class="text-xs text-slate-400 uppercase tracking-wide font-medium">Cooperative</p>
-                <p class="text-sm font-semibold text-slate-700 mt-1">{{ user.cooperative.name }}</p>
-            </div>
-            {% endif %}
-            <div class="mt-4 pt-4 border-t border-slate-100 text-left space-y-2">
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-500">Member Since</span>
-                    <span class="font-medium text-slate-700">{{ user.join_date|default:user.date_joined|date:"M Y" }}</span>
-                </div>
-                <div class="flex items-center justify-between text-sm">
-                    <span class="text-slate-500">Status</span>
-                    {% if user.is_active_member %}
-                    <span class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-xs font-medium text-emerald-700">Active</span>
-                    {% else %}
-                    <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700">Inactive</span>
-                    {% endif %}
-                </div>
-            </div>
+<div class="max-w-4xl mx-auto">
+    <div class="md:flex md:items-center md:justify-between mb-8">
+        <div class="min-w-0 flex-1">
+            <h2 class="text-2xl font-bold leading-7 text-slate-900 sm:truncate sm:text-3xl sm:tracking-tight font-display">
+                Profile Settings
+            </h2>
+            <p class="mt-1 text-sm text-slate-500">
+                Update your personal information and bank details for loan disbursements.
+            </p>
         </div>
     </div>
 
-    <!-- Edit Form Card -->
-    <div class="lg:col-span-2">
-        <div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
-            <div class="border-b border-slate-900/10 bg-slate-50/50 px-8 py-5">
-                <h3 class="text-base font-semibold leading-7 text-slate-900">Personal Information</h3>
-                <p class="mt-1 text-sm leading-6 text-slate-500">Update your name, email, and contact details.</p>
+    <form method="post" class="space-y-8 divide-y divide-slate-200">
+        {% csrf_token %}
+        
+        <div class="space-y-6 pt-8 first:pt-0">
+            <div>
+                <h3 class="text-lg font-medium leading-6 text-slate-900">Personal Information</h3>
+                <p class="mt-1 text-sm text-slate-500">Basic details about you.</p>
             </div>
-            <form method="post" action="" class="django-form px-8 py-8">
-                {% csrf_token %}
-                {% if form.non_field_errors %}
-                <div class="rounded-xl bg-red-50 p-4 mb-6 ring-1 ring-red-500/20">
-                    <p class="text-sm font-medium text-red-800">{{ form.non_field_errors }}</p>
-                </div>
-                {% endif %}
-                <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
-                    {% for field in form %}
-                    <div class="group">
-                        <label for="{{ field.id_for_label }}" class="block text-sm font-semibold leading-6 text-slate-900 group-focus-within:text-primary-600 transition-colors">
-                            {{ field.label }}{% if field.field.required %} <span class="text-primary-600">*</span>{% endif %}
-                        </label>
-                        <div class="mt-2">{{ field }}</div>
-                        {% if field.errors %}
-                        <p class="mt-1 text-sm text-red-500">{{ field.errors.0 }}</p>
-                        {% endif %}
+
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-3">
+                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-medium text-slate-700">First name</label>
+                    <div class="mt-1">
+                        <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}" value="{{ form.first_name.value|default:'' }}" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
                     </div>
-                    {% endfor %}
+                    {{ form.first_name.errors }}
                 </div>
-                <div class="mt-8 flex items-center justify-end gap-x-4 border-t border-slate-900/10 pt-6">
-                    <a href="javascript:history.back()" class="rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50 transition-all">Cancel</a>
-                    <button type="submit" class="rounded-lg bg-primary-600 px-8 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 transition-all">Save Changes</button>
+
+                <div class="sm:col-span-3">
+                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-medium text-slate-700">Last name</label>
+                    <div class="mt-1">
+                        <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}" value="{{ form.last_name.value|default:'' }}" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                    </div>
+                    {{ form.last_name.errors }}
                 </div>
-            </form>
+
+                <div class="sm:col-span-4">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-slate-700">Email address</label>
+                    <div class="mt-1">
+                        <input type="email" name="email" id="{{ form.email.id_for_label }}" value="{{ form.email.value|default:'' }}" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                    </div>
+                    {{ form.email.errors }}
+                </div>
+
+                <div class="sm:col-span-3">
+                    <label for="{{ form.phone.id_for_label }}" class="block text-sm font-medium text-slate-700">Phone number</label>
+                    <div class="mt-1">
+                        <input type="text" name="phone" id="{{ form.phone.id_for_label }}" value="{{ form.phone.value|default:'' }}" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                    </div>
+                    {{ form.phone.errors }}
+                </div>
+
+                <div class="sm:col-span-3">
+                    <label for="{{ form.gender.id_for_label }}" class="block text-sm font-medium text-slate-700">Gender</label>
+                    <div class="mt-1">
+                        <select name="gender" id="{{ form.gender.id_for_label }}" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                            <option value="M" {% if form.gender.value == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if form.gender.value == 'F' %}selected{% endif %}>Female</option>
+                            <option value="O" {% if form.gender.value == 'O' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                    {{ form.gender.errors }}
+                </div>
+
+                <div class="sm:col-span-6">
+                    <label for="{{ form.address.id_for_label }}" class="block text-sm font-medium text-slate-700">Address</label>
+                    <div class="mt-1">
+                        <textarea id="{{ form.address.id_for_label }}" name="address" rows="3" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">{{ form.address.value|default:'' }}</textarea>
+                    </div>
+                    {{ form.address.errors }}
+                </div>
+            </div>
         </div>
-    </div>
+
+        <div class="space-y-6 pt-8">
+            <div>
+                <h3 class="text-lg font-medium leading-6 text-slate-900">Bank Account Details</h3>
+                <p class="mt-1 text-sm text-slate-500">Provide accurate bank details where your loans should be disbursed.</p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                <div class="sm:col-span-3">
+                    <label for="{{ form.bank_name.id_for_label }}" class="block text-sm font-medium text-slate-700">Bank Name</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                        <input type="text" name="bank_name" id="{{ form.bank_name.id_for_label }}" value="{{ form.bank_name.value|default:'' }}" class="block w-full pl-10 rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="e.g. Zenith Bank">
+                    </div>
+                    {{ form.bank_name.errors }}
+                </div>
+
+                <div class="sm:col-span-3">
+                    <label for="{{ form.account_number.id_for_label }}" class="block text-sm font-medium text-slate-700">Account Number</label>
+                    <div class="mt-1">
+                        <input type="text" name="account_number" id="{{ form.account_number.id_for_label }}" value="{{ form.account_number.value|default:'' }}" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="10-digit number">
+                    </div>
+                    {{ form.account_number.errors }}
+                </div>
+
+                <div class="sm:col-span-4">
+                    <label for="{{ form.account_name.id_for_label }}" class="block text-sm font-medium text-slate-700">Account Name</label>
+                    <div class="mt-1">
+                        <input type="text" name="account_name" id="{{ form.account_name.id_for_label }}" value="{{ form.account_name.value|default:'' }}" class="block w-full rounded-md border-slate-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm" placeholder="Name on bank statement">
+                    </div>
+                    {{ form.account_name.errors }}
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-5">
+            <div class="flex justify-end gap-x-3">
+                <a href="{% url 'members:dashboard' %}" class="rounded-md border border-slate-300 bg-white py-2 px-4 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">Cancel</a>
+                <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-primary-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">Save Changes</button>
+            </div>
+        </div>
+    </form>
 </div>
 {% endblock %}

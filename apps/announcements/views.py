@@ -28,14 +28,16 @@ class AnnouncementCreateView(LoginRequiredMixin, CoopAdminRequiredMixin, CreateV
         # Notify all members
         from apps.accounts.models import UserRole
         from apps.notifications.utils import create_notification
+        from django.urls import reverse
         
         members = form.instance.cooperative.users.filter(role=UserRole.MEMBER)
         for member in members:
+            dashboard_url = reverse('members:dashboard')
             create_notification(
                 user=member,
                 title="New Announcement",
                 message=f"Management has posted a new announcement: {form.instance.title}",
-                link=f"/members/dashboard/?announcement_id={form.instance.id}"
+                link=f"{dashboard_url}?announcement_id={form.instance.id}"
             )
             
         return response
@@ -45,3 +47,12 @@ class AnnouncementCreateView(LoginRequiredMixin, CoopAdminRequiredMixin, CreateV
         context['title'] = 'Post Announcement'
         context['description'] = 'Broadcast a new system-wide or cooperative update.'
         return context
+from apps.members.views import MemberRequiredMixin
+
+class MemberAnnouncementListView(LoginRequiredMixin, MemberRequiredMixin, ListView):
+    model = Announcement
+    template_name = 'announcements/member_list.html'
+    context_object_name = 'announcements'
+
+    def get_queryset(self):
+        return Announcement.objects.filter(cooperative=self.request.user.cooperative).order_by('-created_at')

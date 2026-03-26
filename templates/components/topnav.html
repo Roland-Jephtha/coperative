@@ -18,13 +18,13 @@
         <div class="flex items-center gap-x-4 lg:gap-x-6">
             <!-- Notifications Dropdown -->
             <div class="relative" x-data="{ open: false }">
-                <button type="button" @click="open = !open" @click.outside="open = false" class="-m-2.5 p-2.5 text-slate-400 hover:text-slate-500 relative">
+                <button type="button" @click="open = !open" @click.outside="open = false" class="-m-2.5 p-2.5 text-slate-400 hover:text-slate-500 relative" id="notification-bell-btn">
                     <span class="sr-only">View notifications</span>
-                    <svg class="h-6 w-6 {% if unread_notifications_count > 0 %}animate-swing{% endif %}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                    <svg id="notification-bell-icon" class="h-6 w-6 {% if unread_notifications_count > 0 %}animate-swing{% endif %}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                     </svg>
                     {% if unread_notifications_count > 0 %}
-                    <span class="absolute top-2 right-2 flex h-2.5 w-2.5">
+                    <span id="notification-badge" class="absolute top-2 right-2 flex h-2.5 w-2.5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                         <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
                     </span>
@@ -47,14 +47,12 @@
                 <div x-show="open" x-transition x-cloak class="absolute right-0 z-10 mt-2.5 w-80 origin-top-right rounded-md bg-white py-2 shadow-lg ring-1 ring-slate-900/5 focus:outline-none">
                     <div class="px-4 py-2 border-b border-slate-100 flex justify-between items-center">
                         <h3 class="text-sm font-semibold text-slate-900">Notifications</h3>
-                        {% if unread_notifications_count > 0 %}
-                        <span class="inline-flex items-center rounded-full bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/10">
+                        <span id="notification-count-badge" class="{% if unread_notifications_count == 0 %}hidden{% endif %} inline-flex items-center rounded-full bg-rose-50 px-2 py-1 text-xs font-medium text-rose-700 ring-1 ring-inset ring-rose-600/10">
                             {{ unread_notifications_count }} new
                         </span>
-                        {% endif %}
                     </div>
                     
-                    <div class="max-h-96 overflow-y-auto">
+                    <div class="max-h-96 overflow-y-auto" id="notification-dropdown-list">
                         {% for notification in recent_notifications %}
                         <a href="{% if not notification.is_read %}{% url 'notifications:mark_read' notification.pk %}{% else %}{{ notification.link|default:'#' }}{% endif %}" class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 border-b border-slate-50 {% if not notification.is_read %}bg-slate-50/50{% endif %}">
                             <div class="flex items-start gap-2">
@@ -69,7 +67,7 @@
                             </div>
                         </a>
                         {% empty %}
-                        <div class="px-4 py-8 text-center text-sm text-slate-400">
+                        <div id="no-notifications-msg" class="px-4 py-8 text-center text-sm text-slate-400">
                             No notifications yet.
                         </div>
                         {% endfor %}
