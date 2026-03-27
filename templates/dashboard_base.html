@@ -127,4 +127,54 @@
         });
     }
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Real-time filtering logic
+    document.querySelectorAll('.realtime-filter').forEach(form => {
+        let timer;
+        const targetId = form.dataset.target || 'table-container';
+        
+        form.addEventListener('input', (e) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                const url = new URL(window.location.href);
+                const formData = new FormData(form);
+                for (let [key, value] of formData.entries()) {
+                    url.searchParams.set(key, value);
+                }
+                url.searchParams.set('page', 1); // reset to page 1 on new filter
+                
+                fetch(url.toString(), {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(r => r.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newContent = doc.getElementById(targetId);
+                    const oldContent = document.getElementById(targetId);
+                    if (newContent && oldContent) {
+                        oldContent.innerHTML = newContent.innerHTML;
+                        if (window.Alpine) {
+                            window.Alpine.initTree(oldContent);
+                        }
+                        window.history.pushState({}, '', url.toString());
+                    }
+                });
+            }, 300);
+        });
+        
+        // Handle change events for selects
+        form.addEventListener('change', (e) => {
+            if (e.target.tagName === 'SELECT') {
+                form.dispatchEvent(new Event('input'));
+            }
+        });
+        
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -1,5 +1,8 @@
 from django.urls import path
-from .views import CooperativeLoansView, MemberLoansView, LoanCreateView, MemberLoanCreateView, LoanScheduleView, ApproveLoanView, RejectLoanView, DisburseLoanView
+from .views import (
+    CooperativeLoansView, MemberLoansView, LoanCreateView, MemberLoanCreateView, 
+    LoanScheduleView, ApproveLoanView, RejectLoanView, DisburseLoanView, ExportLoanCSVView
+)
 
 app_name = 'loans'
 urlpatterns = [
@@ -11,4 +14,5 @@ urlpatterns = [
     path('<int:loan_id>/approve/', ApproveLoanView.as_view(), name='approve'),
     path('<int:loan_id>/disburse/', DisburseLoanView.as_view(), name='disburse'),
     path('<int:loan_id>/reject/', RejectLoanView.as_view(), name='reject'),
+    path('export/csv/', ExportLoanCSVView.as_view(), name='export_csv'),
 ]

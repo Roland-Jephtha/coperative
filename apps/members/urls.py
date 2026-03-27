@@ -3,7 +3,7 @@ from .views import MemberDashboardView
 from .views_admin import (
     CooperativeMembersView, MemberCreateView, MemberDetailView,
     MemberUpdateView, MemberSuspendView, MemberActivateView,
-    MemberCreateSuccessView
+    MemberCreateSuccessView, ExportMemberCSVView
 )
 
 app_name = 'members'
@@ -17,4 +17,5 @@ urlpatterns = [
     path('management/<int:member_id>/edit/', MemberUpdateView.as_view(), name='edit'),
     path('management/<int:member_id>/suspend/', MemberSuspendView.as_view(), name='suspend'),
     path('management/<int:member_id>/activate/', MemberActivateView.as_view(), name='activate'),
+    path('export/csv/', ExportMemberCSVView.as_view(), name='export_csv'),
 ]

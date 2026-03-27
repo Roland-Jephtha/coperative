@@ -18,8 +18,11 @@
             </div>
             <p class="ml-16 truncate text-sm font-medium text-slate-500">Total Savings Balance</p>
         </dt>
-        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
-            <p class="text-3xl font-bold font-display text-slate-900">₦{{ total_contributions|default:"0.00" }}</p>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7" x-data="{ amount: '{{ total_contributions|default:'0.00' }}' }">
+            <p :class="amount.length > 12 ? 'text-xl' : (amount.length > 8 ? 'text-2xl' : 'text-3xl')" 
+               class="font-bold font-display text-slate-900 transition-all duration-300">
+               ₦<span x-text="amount"></span>
+            </p>
             <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6 border-t border-slate-100">
                 <div class="text-sm">
                     <a href="{% url 'contributions:member_list' %}" class="font-medium text-emerald-600 hover:text-emerald-500 flex items-center justify-between">
@@ -41,8 +44,11 @@
             </div>
             <p class="ml-16 truncate text-sm font-medium text-slate-500">Active Loan Outstanding</p>
         </dt>
-        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
-            <p class="text-3xl font-bold font-display text-slate-900">₦{{ active_loan_balance|default:"0.00" }}</p>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7" x-data="{ amount: '{{ active_loan_balance|default:'0.00' }}' }">
+            <p :class="amount.length > 12 ? 'text-xl' : (amount.length > 8 ? 'text-2xl' : 'text-3xl')" 
+               class="font-bold font-display text-slate-900 transition-all duration-300">
+               ₦<span x-text="amount"></span>
+            </p>
             <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6 border-t border-slate-100">
                 <div class="text-sm">
                     <a href="{% url 'loans:member_list' %}" class="font-medium text-blue-600 hover:text-blue-500 flex items-center justify-between">

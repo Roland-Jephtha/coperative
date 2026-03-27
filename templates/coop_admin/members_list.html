@@ -10,7 +10,8 @@
         <p class="mt-2 text-sm text-slate-600">A complete list of all registered members with their status, contributions, and active loans.</p>
     </div>
     <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-3">
-        {% include "components/button.html" with type="outline" text="Export CSV" url="#" %}
+        {% url 'members:export_csv' as export_csv_url %}
+        {% include "components/button.html" with type="outline" text="Export CSV" url=export_csv_url %}
         {% include "components/button.html" with type="primary" text="Add Member" url=add_url %}
     </div>
 </div>
@@ -33,7 +34,7 @@
 
 <!-- Filters -->
 <div class="mb-4 flex gap-3 items-center flex-wrap">
-    <form method="GET" action="" class="flex gap-3 flex-1 flex-wrap">
+    <form method="GET" action="" class="flex gap-3 flex-1 flex-wrap realtime-filter">
         <div class="relative flex-1 min-w-[220px]">
             <svg class="pointer-events-none absolute inset-y-0 left-3 h-5 w-5 text-slate-400 top-1/2 -translate-y-1/2" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
@@ -53,23 +54,55 @@
 </div>
 
 <!-- Members Table -->
-<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden">
+<div id="table-container">
+<div class="bg-white rounded-2xl shadow-sm ring-1 ring-slate-900/5 overflow-hidden" x-data="{
+    sortCol: '', 
+    sortAsc: true,
+    sort(col) {
+        if (this.sortCol === col) this.sortAsc = !this.sortAsc;
+        else { this.sortCol = col; this.sortAsc = true; }
+        this.sortTable();
+    },
+    sortTable() {
+        const tbody = this.$refs.tbody;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-sortable]'));
+        rows.sort((a, b) => {
+            let aVal = a.dataset[this.sortCol] || '';
+            let bVal = b.dataset[this.sortCol] || '';
+            if (!isNaN(aVal) && !isNaN(bVal)) { aVal = parseFloat(aVal); bVal = parseFloat(bVal); }
+            if (aVal < bVal) return this.sortAsc ? -1 : 1;
+            if (aVal > bVal) return this.sortAsc ? 1 : -1;
+            return 0;
+        });
+        rows.forEach(row => tbody.appendChild(row));
+    }
+}">
     <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-slate-200">
         <thead class="bg-slate-50">
             <tr>
-                <th scope="col" class="py-3.5 pl-6 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Member</th>
+                <th scope="col" @click="sort('name')" class="cursor-pointer hover:bg-slate-100 py-3.5 pl-6 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <span class="flex items-center gap-1">Member <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                </th>
                 <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Contact</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Status</th>
-                <th scope="col" class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Contributions</th>
+                <th scope="col" @click="sort('status')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <span class="flex items-center gap-1">Status <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                </th>
+                <th scope="col" @click="sort('contributions')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    <span class="flex items-center justify-end gap-1">Contributions <svg class="h-3 w-3 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                </th>
                 <th scope="col" class="px-3 py-3.5 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">Active Loans</th>
                 <th scope="col" class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">Joined</th>
                 <th scope="col" class="relative py-3.5 pl-3 pr-6 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">Actions</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100 bg-white">
+        <tbody class="divide-y divide-slate-100 bg-white" x-ref="tbody">
             {% for member in members %}
-            <tr class="hover:bg-slate-50/60 transition-colors group" x-data>
+            <tr class="hover:bg-slate-50/60 transition-colors group" x-data 
+                data-sortable="true" 
+                data-name="{{ member.get_full_name|default:member.username }}"
+                data-status="{% if member.is_suspended %}0{% elif member.is_active_member %}2{% else %}1{% endif %}"
+                data-contributions="{{ member.contributions.all|length }}">
                 <td class="whitespace-nowrap py-4 pl-6 pr-3">
                     <div class="flex items-center gap-4">
                         <div class="h-9 w-9 flex-shrink-0 rounded-full flex items-center justify-center font-bold text-sm
@@ -187,5 +220,7 @@
         </tbody>
     </table>
     </div>
+    {% include "components/pagination.html" %}
+</div>
 </div>
 {% endblock %}

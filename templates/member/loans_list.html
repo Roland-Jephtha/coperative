@@ -6,33 +6,69 @@
         <h1 class="text-2xl font-semibold leading-6 text-slate-900">My Loans</h1>
         <p class="mt-2 text-sm text-slate-700">Track your active loans, repayment history, and pending applications.</p>
     </div>
-    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-3">
+        {% url 'loans:export_csv' as export_csv_url %}
+        {% include "components/button.html" with type="outline" text="Export CSV" url=export_csv_url %}
         <a href="{% url 'loans:apply' %}" class="block rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">
             Apply for New Loan
         </a>
     </div>
 </div>
 
-<div class="mt-8 flow-root">
+<div class="mt-8 flow-root" x-data="{
+    sortCol: '', 
+    sortAsc: true,
+    sort(col) {
+        if (this.sortCol === col) this.sortAsc = !this.sortAsc;
+        else { this.sortCol = col; this.sortAsc = true; }
+        this.sortTable();
+    },
+    sortTable() {
+        const tbody = this.$refs.tbody;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-sortable]'));
+        rows.sort((a, b) => {
+            let aVal = a.dataset[this.sortCol] || '';
+            let bVal = b.dataset[this.sortCol] || '';
+            if (!isNaN(aVal) && !isNaN(bVal)) { aVal = parseFloat(aVal); bVal = parseFloat(bVal); }
+            if (aVal < bVal) return this.sortAsc ? -1 : 1;
+            if (aVal > bVal) return this.sortAsc ? 1 : -1;
+            return 0;
+        });
+        rows.forEach(row => tbody.appendChild(row));
+    }
+}">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-b-xl border border-slate-200">
+            <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-b-xl border border-slate-200">
                 <table class="min-w-full divide-y divide-slate-300">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Applied On</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Principal</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Balance</th>
+                            <th scope="col" @click="sort('date')" class="cursor-pointer hover:bg-slate-100 py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">
+                                <span class="flex items-center gap-1">Applied On <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                            </th>
+                            <th scope="col" @click="sort('amount')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-left text-sm font-semibold text-slate-900">
+                                <span class="flex items-center gap-1">Principal <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                            </th>
+                            <th scope="col" @click="sort('balance')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-left text-sm font-semibold text-slate-900">
+                                <span class="flex items-center gap-1">Balance <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                            </th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Interest</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Status</th>
+                            <th scope="col" @click="sort('status')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-left text-sm font-semibold text-slate-900">
+                                <span class="flex items-center gap-1">Status <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                            </th>
                             <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
                                 <span class="sr-only">Actions</span>
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white">
+                    <tbody class="divide-y divide-slate-200 bg-white" x-ref="tbody">
                         {% for loan in loans %}
-                        <tr>
+                        <tr class="hover:bg-slate-50 transition-colors group"
+                            data-sortable="true"
+                            data-date="{{ loan.application_date|date:'Y-m-d' }}"
+                            data-amount="{{ loan.amount }}"
+                            data-balance="{{ loan.balance_remaining }}"
+                            data-status="{% if loan.status == 'ACTIVE' %}5{% elif loan.status == 'APPROVED' %}4{% elif loan.status == 'PENDING' %}3{% elif loan.status == 'COMPLETED' %}2{% else %}1{% endif %}">
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">{{ loan.application_date|date:"F d, Y" }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">₦{{ loan.amount|floatformat:2|intcomma }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm font-bold text-rose-600">₦{{ loan.balance_remaining|floatformat:2|intcomma }}</td>
@@ -60,6 +96,7 @@
                     </tbody>
                 </table>
             </div>
+            {% include "components/pagination.html" %}
         </div>
     </div>
 </div>

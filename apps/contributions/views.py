@@ -10,9 +10,30 @@ class CooperativeContributionsView(LoginRequiredMixin, CoopAdminRequiredMixin, L
     model = Contribution
     template_name = 'coop_admin/contributions_list.html'
     context_object_name = 'contributions'
+    paginate_by = 7
 
     def get_queryset(self):
-        return Contribution.objects.filter(cooperative=self.request.user.cooperative).order_by('-contribution_date')
+        qs = Contribution.objects.filter(cooperative=self.request.user.cooperative).order_by('-contribution_date')
+        q = self.request.GET.get('q', '')
+        status = self.request.GET.get('status', '')
+        
+        if q:
+            qs = qs.filter(member__first_name__icontains=q) | qs.filter(member__last_name__icontains=q) | qs.filter(payment_reference__icontains=q)
+            
+        if status == 'This Month':
+            qs = qs.filter(contribution_date__month=timezone.now().month, contribution_date__year=timezone.now().year)
+        elif status == 'Last 30 Days':
+            qs = qs.filter(contribution_date__gte=timezone.now() - timezone.timedelta(days=30))
+        elif status == 'This Year':
+            qs = qs.filter(contribution_date__year=timezone.now().year)
+            
+        return qs
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '')
+        context['status_filter'] = self.request.GET.get('status', '')
+        return context
 
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy, reverse
@@ -57,6 +78,7 @@ class MemberContributionsView(LoginRequiredMixin, MemberRequiredMixin, ListView)
     model = Contribution
     template_name = 'member/contributions_list.html'
     context_object_name = 'contributions'
+    paginate_by = 7
 
     def get_queryset(self):
         return Contribution.objects.filter(member=self.request.user).order_by('-contribution_date')
@@ -140,3 +162,13 @@ class RejectContributionView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
         context['title'] = 'Add Savings'
         context['description'] = 'Record a new savings deposit to your ledger.'
         return context
+from apps.core.utils import export_to_csv
+
+class ExportContributionCSVView(LoginRequiredMixin, View):
+    def get(self, request):
+        queryset = Contribution.objects.filter(cooperative=request.user.cooperative)
+        if request.user.role == UserRole.MEMBER:
+            queryset = queryset.filter(member=request.user)
+            
+        fields = ['member__username', 'amount', 'contribution_date', 'payment_reference', 'status']
+        return export_to_csv(queryset, fields, filename_prefix="contributions")

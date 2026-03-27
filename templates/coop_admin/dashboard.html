@@ -45,8 +45,11 @@
             </div>
             <p class="ml-16 truncate text-sm font-medium text-slate-500">Total Reserve (Contributions)</p>
         </dt>
-        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
-            <p class="text-2xl font-semibold font-display text-slate-900">₦{{ total_contributions|default:"0.00" }}</p>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7" x-data="{ amount: '{{ total_contributions|default:'0.00' }}' }">
+            <p :class="amount.length > 14 ? 'text-lg' : (amount.length > 10 ? 'text-xl' : 'text-2xl')" 
+               class="font-semibold font-display text-slate-900 transition-all duration-300">
+               ₦<span x-text="amount"></span>
+            </p>
             <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6">
                 <div class="text-sm">
                     <a href="{% url 'contributions:coop_list' %}" class="font-medium text-emerald-600 hover:text-emerald-500">View ledger<span class="sr-only"> ledger view</span></a>
@@ -65,8 +68,11 @@
             </div>
             <p class="ml-16 truncate text-sm font-medium text-slate-500">Active Loans Principal</p>
         </dt>
-        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7">
-            <p class="text-2xl font-semibold font-display text-slate-900">₦{{ active_loans_total|default:"0.00" }}</p>
+        <dd class="ml-16 flex items-baseline pb-6 sm:pb-7" x-data="{ amount: '{{ active_loans_total|default:'0.00' }}' }">
+            <p :class="amount.length > 14 ? 'text-lg' : (amount.length > 10 ? 'text-xl' : 'text-2xl')" 
+               class="font-semibold font-display text-slate-900 transition-all duration-300">
+               ₦<span x-text="amount"></span>
+            </p>
             <div class="absolute inset-x-0 bottom-0 bg-slate-50 px-4 py-4 sm:px-6">
                 <div class="text-sm">
                     <a href="{% url 'loans:coop_list' %}" class="font-medium text-blue-600 hover:text-blue-500">View schedules<span class="sr-only"> schedules</span></a>

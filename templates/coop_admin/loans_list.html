@@ -7,41 +7,74 @@
         <p class="mt-2 text-sm text-slate-600">Track, approve, and manage active loans and repayment schedules within your cooperative.</p>
     </div>
     <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-3">
-        {% include "components/button.html" with type="outline" text="Export CSV" url="#" %}
+        {% include "components/button.html" with type="outline" text="Export CSV" url="loans:export_csv"|add:"" %}
         {% url 'loans:add' as add_url %}
         {% include "components/button.html" with type="primary" text="New Loan Application" url=add_url %}
     </div>
 </div>
 
-<div class="mt-8 flex items-center justify-between gap-4 bg-white p-4 rounded-t-xl border border-slate-200 border-b-0 shadow-sm">
+<form class="mt-8 flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-t-xl border border-slate-200 border-b-0 shadow-sm realtime-filter" action="" method="GET">
     <div class="relative max-w-sm flex-1">
         <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
         </svg>
-        <input type="text" class="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6" placeholder="Search applicant...">
+        <input type="text" name="q" value="{{ q }}" class="block w-full rounded-md border-0 py-1.5 pl-10 pr-3 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6" placeholder="Search applicant...">
     </div>
     <div class="flex items-center gap-2">
-        <select class="rounded-md border-0 py-1.5 pl-3 pr-8 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm sm:leading-6">
-            <option>All Statuses</option>
-            <option>Pending</option>
-            <option>Approved</option>
-            <option>Active</option>
-            <option>Completed</option>
-            <option>Defaulted</option>
+        <select name="status" class="rounded-md border-0 py-1.5 pl-3 pr-8 text-slate-900 ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-primary-600 sm:text-sm sm:leading-6">
+            <option {% if status_filter == 'All Statuses' or not status_filter %}selected{% endif %}>All Statuses</option>
+            <option {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+            <option {% if status_filter == 'Approved' %}selected{% endif %}>Approved</option>
+            <option {% if status_filter == 'Active' %}selected{% endif %}>Active</option>
+            <option {% if status_filter == 'Completed' %}selected{% endif %}>Completed</option>
+            <option {% if status_filter == 'Defaulted' %}selected{% endif %}>Defaulted</option>
         </select>
     </div>
-</div>
+</form>
 
-<div class="flow-root">
+<div id="table-container">
+<div class="flow-root" x-data="{ 
+    sortCol: '', 
+    sortAsc: true,
+    copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Copied to clipboard!');
+        });
+    },
+    sort(col) {
+        if (this.sortCol === col) this.sortAsc = !this.sortAsc;
+        else { this.sortCol = col; this.sortAsc = true; }
+        this.sortTable();
+    },
+    sortTable() {
+        const tbody = this.$refs.tbody;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-sortable]'));
+        rows.sort((a, b) => {
+            let aVal = a.dataset[this.sortCol] || '';
+            let bVal = b.dataset[this.sortCol] || '';
+            if (!isNaN(aVal) && !isNaN(bVal)) { aVal = parseFloat(aVal); bVal = parseFloat(bVal); }
+            if (aVal < bVal) return this.sortAsc ? -1 : 1;
+            if (aVal > bVal) return this.sortAsc ? 1 : -1;
+            return 0;
+        });
+        rows.forEach(row => tbody.appendChild(row));
+    }
+}">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-b-xl border border-t-0 border-slate-200">
+            <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-b-none border border-t-0 border-slate-200">
                 <table class="min-w-full divide-y divide-slate-200">
                     <thead class="bg-slate-50">
                         <tr>
-                             <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Applicant</th>
-                             <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-slate-900">Principal</th>
-                             <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-slate-900">Balance</th>
+                             <th scope="col" @click="sort('member')" class="cursor-pointer hover:bg-slate-100 py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">
+                                 <span class="flex items-center gap-1">Applicant <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                             </th>
+                             <th scope="col" @click="sort('amount')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-right text-sm font-semibold text-slate-900">
+                                 <span class="flex items-center justify-end gap-1">Principal <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                             </th>
+                             <th scope="col" @click="sort('balance')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-right text-sm font-semibold text-slate-900">
+                                 <span class="flex items-center justify-end gap-1">Balance <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                             </th>
                              <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-slate-900">Interest Setup</th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Duration</th>
                             <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-slate-900">Status</th>
@@ -50,15 +83,22 @@
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white">
+                    <tbody class="divide-y divide-slate-200 bg-white" x-ref="tbody">
                         {% for loan in loans %}
-                        <tr class="hover:bg-slate-50 transition-colors group">
+                        <tr class="hover:bg-slate-50 transition-colors group"
+                            data-sortable="true"
+                            data-member="{{ loan.member.get_full_name|default:loan.member.username }}"
+                            data-amount="{{ loan.amount }}"
+                            data-balance="{{ loan.balance_remaining }}">
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
                                 <div class="font-medium text-slate-900">{{ loan.member.get_full_name|default:loan.member.username }}</div>
                                 <div class="text-xs text-slate-500 mt-0.5">Applied: {{ loan.application_date|date:"N j, Y" }}</div>
-                                <div class="text-xs text-slate-500 mt-1">
+                                <div class="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
                                     {% if loan.member.bank_name %}
                                         <span class="font-semibold text-slate-700">{{ loan.member.bank_name }}:</span> {{ loan.member.account_number }} ({{ loan.member.account_name }})
+                                        <button @click="copyToClipboard('{{ loan.member.account_name }}\n{{ loan.member.account_number }}\n{{ loan.member.bank_name }}')" class="text-slate-400 hover:text-primary-600 transition-colors" title="Copy Bank Details">
+                                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                                        </button>
                                     {% else %}
                                         <span class="text-rose-500 italic">No bank details provided</span>
                                     {% endif %}
@@ -142,7 +182,9 @@
                     </tbody>
                 </table>
             </div>
+            {% include "components/pagination.html" %}
         </div>
     </div>
+</div>
 </div>
 {% endblock %}

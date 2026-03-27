@@ -11,9 +11,23 @@ class CooperativeLoansView(LoginRequiredMixin, CoopAdminRequiredMixin, ListView)
     model = Loan
     template_name = 'coop_admin/loans_list.html'
     context_object_name = 'loans'
+    paginate_by = 7
 
     def get_queryset(self):
-        return Loan.objects.filter(cooperative=self.request.user.cooperative).order_by('-created_at')
+        qs = Loan.objects.filter(cooperative=self.request.user.cooperative).order_by('-created_at')
+        q = self.request.GET.get('q', '')
+        status = self.request.GET.get('status', '')
+        if q:
+            qs = qs.filter(member__first_name__icontains=q) | qs.filter(member__last_name__icontains=q) | qs.filter(member__username__icontains=q)
+        if status and status != 'All Statuses':
+            qs = qs.filter(status=status.upper())
+        return qs
+        
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q'] = self.request.GET.get('q', '')
+        context['status_filter'] = self.request.GET.get('status', '')
+        return context
 
 from django.views.generic.edit import CreateView
 from django.urls import reverse_lazy, reverse
@@ -47,6 +61,7 @@ class MemberLoansView(LoginRequiredMixin, MemberRequiredMixin, ListView):
     model = Loan
     template_name = 'member/loans_list.html'
     context_object_name = 'loans'
+    paginate_by = 7
 
     def get_queryset(self):
         return Loan.objects.filter(member=self.request.user).order_by('-created_at')
@@ -169,23 +184,13 @@ class RejectLoanView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
         return redirect('loans:coop_list')
 
 
-import csv
-from django.http import HttpResponse
+from apps.core.utils import export_to_csv
 
-def export_loans_csv(request):
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="loans.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Member', 'Amount', 'Interest Rate', 'Duration', 'Status', 'Date Applied'])
-    
-    loans = Loan.objects.filter(cooperative=request.user.cooperative)
-    for loan in loans:
-        writer.writerow([
-            loan.member.get_full_name(), 
-            loan.amount, 
-            loan.interest_rate, 
-            loan.duration_months, 
-            loan.get_status_display(),
-            loan.application_date
-        ])
-    return response
+class ExportLoanCSVView(LoginRequiredMixin, View):
+    def get(self, request):
+        queryset = Loan.objects.filter(cooperative=request.user.cooperative)
+        if request.user.role == UserRole.MEMBER:
+            queryset = queryset.filter(member=request.user)
+            
+        fields = ['member__username', 'amount', 'interest_rate', 'duration_months', 'status', 'created_at']
+        return export_to_csv(queryset, fields, filename_prefix="loans")

@@ -6,7 +6,9 @@
         <h1 class="text-2xl font-semibold leading-6 text-slate-900">My Savings</h1>
         <p class="mt-2 text-sm text-slate-700">A historical log of your contributions to the cooperative.</p>
     </div>
-    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none flex gap-3">
+        {% url 'contributions:export_csv' as export_csv_url %}
+        {% include "components/button.html" with type="outline" text="Export CSV" url=export_csv_url %}
         <a href="{% url 'contributions:deposit' %}" class="inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-all">
             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -16,22 +18,53 @@
     </div>
 </div>
 
-<div class="mt-8 flow-root">
+<div class="mt-8 flow-root" x-data="{
+    sortCol: '', 
+    sortAsc: true,
+    sort(col) {
+        if (this.sortCol === col) this.sortAsc = !this.sortAsc;
+        else { this.sortCol = col; this.sortAsc = true; }
+        this.sortTable();
+    },
+    sortTable() {
+        const tbody = this.$refs.tbody;
+        const rows = Array.from(tbody.querySelectorAll('tr[data-sortable]'));
+        rows.sort((a, b) => {
+            let aVal = a.dataset[this.sortCol] || '';
+            let bVal = b.dataset[this.sortCol] || '';
+            if (!isNaN(aVal) && !isNaN(bVal)) { aVal = parseFloat(aVal); bVal = parseFloat(bVal); }
+            if (aVal < bVal) return this.sortAsc ? -1 : 1;
+            if (aVal > bVal) return this.sortAsc ? 1 : -1;
+            return 0;
+        });
+        rows.forEach(row => tbody.appendChild(row));
+    }
+}">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
         <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <div class="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
                 <table class="min-w-full divide-y divide-slate-300">
                     <thead class="bg-slate-50">
                         <tr>
-                            <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">Date</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Amount</th>
-                            <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Status</th>
+                            <th scope="col" @click="sort('date')" class="cursor-pointer hover:bg-slate-100 py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">
+                                <span class="flex items-center gap-1">Date <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                            </th>
+                            <th scope="col" @click="sort('amount')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-left text-sm font-semibold text-slate-900">
+                                <span class="flex items-center gap-1">Amount <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                            </th>
+                            <th scope="col" @click="sort('status')" class="cursor-pointer hover:bg-slate-100 px-3 py-3.5 text-left text-sm font-semibold text-slate-900">
+                                <span class="flex items-center gap-1">Status <svg class="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg></span>
+                            </th>
                             <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">Reference</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200 bg-white">
+                    <tbody class="divide-y divide-slate-200 bg-white" x-ref="tbody">
                         {% for contribution in contributions %}
-                        <tr>
+                        <tr class="hover:bg-slate-50 transition-colors group"
+                            data-sortable="true"
+                            data-date="{{ contribution.contribution_date|date:'Y-m-d' }}"
+                            data-amount="{{ contribution.amount }}"
+                            data-status="{% if contribution.status == 'APPROVED' %}2{% elif contribution.status == 'PENDING' %}1{% else %}0{% endif %}">
                             <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">{{ contribution.contribution_date|date:"F d, Y" }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm font-semibold {% if contribution.status == 'APPROVED' %}text-emerald-600{% else %}text-slate-500{% endif %}">+₦{{ contribution.amount|floatformat:2|intcomma }}</td>
                             <td class="whitespace-nowrap px-3 py-4 text-sm">
@@ -52,6 +85,7 @@
                     </tbody>
                 </table>
             </div>
+            {% include "components/pagination.html" %}
         </div>
     </div>
 </div>

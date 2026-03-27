@@ -20,6 +20,7 @@ class CooperativeMembersView(LoginRequiredMixin, CoopAdminRequiredMixin, ListVie
     model = User
     template_name = 'coop_admin/members_list.html'
     context_object_name = 'members'
+    paginate_by = 7
 
     def get_queryset(self):
         qs = User.objects.filter(
@@ -246,3 +247,24 @@ class MemberActivateView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
 
         messages.success(request, f"Member {member.get_full_name()} has been reactivated successfully.")
         return redirect(request.META.get('HTTP_REFERER', reverse('members:coop_list')))
+
+from apps.core.utils import export_to_csv
+
+class ExportMemberCSVView(LoginRequiredMixin, CoopAdminRequiredMixin, View):
+    def get(self, request):
+        queryset = User.objects.filter(
+            cooperative=request.user.cooperative,
+            role=UserRole.MEMBER
+        ).order_by('-date_joined')
+        
+        q = request.GET.get('q', '')
+        status = request.GET.get('status', '')
+        if q:
+            queryset = queryset.filter(first_name__icontains=q) | queryset.filter(last_name__icontains=q) | queryset.filter(email__icontains=q)
+        if status == 'active':
+            queryset = queryset.filter(is_suspended=False, is_active_member=True)
+        elif status == 'suspended':
+            queryset = queryset.filter(is_suspended=True)
+            
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'gender', 'is_suspended', 'date_joined']
+        return export_to_csv(queryset, fields, filename_prefix="members")
