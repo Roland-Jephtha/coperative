@@ -13,6 +13,7 @@ class Contribution(models.Model):
     recorded_by = models.ForeignKey('accounts.User', on_delete=models.SET_NULL, null=True, related_name='recorded_contributions')
     payment_reference = models.CharField(max_length=100, null=True, blank=True)
     status = models.CharField(max_length=20, choices=TransactionStatus.choices, default=TransactionStatus.PENDING)
+    proof_of_payment = models.ImageField(upload_to='proof_of_payments/', null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

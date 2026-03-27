@@ -84,5 +84,10 @@ class CooperativeSetting(models.Model):
     account_number = models.CharField(max_length=20, null=True, blank=True)
     account_name = models.CharField(max_length=255, null=True, blank=True)
 
+    # Notification Preferences
+    email_notifications = models.BooleanField(default=True)
+    in_app_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
+
     def __str__(self):
         return f"{self.cooperative.name} Settings"

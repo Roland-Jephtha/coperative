@@ -241,6 +241,12 @@ class CooperativeOnboardingView(LoginRequiredMixin, CoopAdminRequiredMixin, View
             settings.account_name = request.POST.get('account_name')
             settings.savings_interest_rate = request.POST.get('savings_interest_rate', 0)
             
+            # Notification Preferences
+            settings.email_notifications = request.POST.get('email_notifications') == 'on'
+            settings.in_app_notifications = request.POST.get('in_app_notifications') == 'on'
+            # sms_notifications is disabled/coming soon in UI, but we can set it if posted
+            settings.sms_notifications = request.POST.get('sms_notifications') == 'on'
+
             settings.save()
             
             # Mark setup complete
@@ -255,8 +261,9 @@ class CooperativeOnboardingView(LoginRequiredMixin, CoopAdminRequiredMixin, View
 
 from django.views.generic import UpdateView
 from django.urls import reverse_lazy
+from django.contrib.messages.views import SuccessMessageMixin
 
-class CooperativeSettingsUpdateView(LoginRequiredMixin, CoopAdminRequiredMixin, UpdateView):
+class CooperativeSettingsUpdateView(LoginRequiredMixin, CoopAdminRequiredMixin, SuccessMessageMixin, UpdateView):
     model = CooperativeSetting
     template_name = 'coop_admin/settings.html'
     fields = [
@@ -267,9 +274,11 @@ class CooperativeSettingsUpdateView(LoginRequiredMixin, CoopAdminRequiredMixin, 
         'loan_eligibility_type', 'min_contribution_months_required',
         'repayment_frequency', 'grace_period_days',
         'penalty_type', 'penalty_value', 'penalty_frequency',
-        'allow_early_repayment', 'apply_early_repayment_discount'
+        'allow_early_repayment', 'apply_early_repayment_discount',
+        'email_notifications', 'in_app_notifications', 'sms_notifications'
     ]
     success_url = reverse_lazy('cooperatives:settings')
+    success_message = "Cooperative settings updated successfully!"
 
     def get_object(self, queryset=None):
         from .models import CooperativeSetting

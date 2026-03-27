@@ -128,13 +128,18 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
+# Email Configuration (SMTP)
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com' # Replace with your SMTP host
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-email@gmail.com' # Replace with your email
+EMAIL_HOST_PASSWORD = 'your-app-password' # Replace with your app password
+DEFAULT_FROM_EMAIL = 'CoopSaaS <notifications@coopsaas.com>'
 
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Use console backend in development for easier testing
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -145,13 +150,16 @@ AUTH_USER_MODEL = "accounts.User"
 
 # Pusher Settings
 import os
-# PUSHER_APP_ID = os.environ.get("PUSHER_APP_ID", "")
-# PUSHER_KEY = os.environ.get("PUSHER_KEY", "")
-# PUSHER_SECRET = os.environ.get("PUSHER_SECRET", "")
-# PUSHER_CLUSTER = os.environ.get("PUSHER_CLUSTER", "mt1")
 
+PUSHER_APP_ID = "2132912"
+PUSHER_KEY = "fb72264a6fe5667e4e4f"
+PUSHER_SECRET = "877f75a6afb017959933"
+PUSHER_CLUSTER = "mt1"
 
-PUSHER_APP_ID="2132912"
-PUSHER_KEY="fb72264a6fe5667e4e4f"
-PUSHER_SECRET="877f75a6afb017959933"
-PUSHER_CLUSTER="mt1"
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

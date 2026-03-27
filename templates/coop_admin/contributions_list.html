@@ -72,40 +72,81 @@
                                     {{ contribution.get_status_display }}
                                 </span>
                             </td>
-                            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                <div class="flex items-center justify-end gap-2">
-                                    {% if contribution.status == 'PENDING' %}
-                                    <form action="{% url 'contributions:approve' contribution.pk %}" method="POST" class="inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="text-emerald-600 hover:text-emerald-900 bg-emerald-50 px-2 py-1 rounded">Approve</button>
-                                    </form>
-                                    <form action="{% url 'contributions:reject' contribution.pk %}" method="POST" class="inline">
-                                        {% csrf_token %}
-                                        <button type="submit" class="text-rose-600 hover:text-rose-900 bg-rose-50 px-2 py-1 rounded">Reject</button>
-                                    </form>
-                                    {% endif %}
-                                    <button class="text-slate-400 hover:text-primary-600 p-1 rounded hover:bg-slate-100 transition-colors" title="View details">
-                                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                    </button>
+                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <div class="flex items-center justify-end gap-2" x-data="{ showProof: false }">
+                            {% if contribution.proof_of_payment %}
+                            <button @click="showProof = true" class="text-primary-600 hover:text-primary-900 bg-primary-50 px-2 py-1 rounded flex items-center gap-1" title="View Proof">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                Proof
+                            </button>
+
+                            <!-- Proof Modal -->
+                            <template x-teleport="body">
+                                <div x-show="showProof" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+                                    <div class="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                                        <div x-show="showProof" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-slate-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="showProof = false"></div>
+                                        <span class="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">&#8203;</span>
+                                        <div x-show="showProof" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="relative inline-block transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6 sm:align-middle">
+                                            <div class="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
+                                                <button type="button" class="rounded-md bg-white text-slate-400 hover:text-slate-500 focus:outline-none" @click="showProof = false">
+                                                    <span class="sr-only">Close</span>
+                                                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                                </button>
+                                            </div>
+                                            <div>
+                                                <div class="mt-3 text-center sm:mt-0 sm:text-left">
+                                                    <h3 class="text-base font-semibold leading-6 text-slate-900" id="modal-title">Proof of Payment</h3>
+                                                    <div class="mt-4">
+                                                        <img src="{{ contribution.proof_of_payment.url }}" alt="Proof of Payment" class="w-full h-auto rounded-lg shadow-sm border border-slate-200 mb-4">
+                                                        <a href="{{ contribution.proof_of_payment.url }}" download class="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-800 font-medium">
+                                                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                            Download Original Image
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-5 sm:mt-6 flex gap-3">
+                                                <button type="button" class="inline-flex w-full justify-center rounded-md bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm hover:bg-slate-200" @click="showProof = false">Close</button>
+                                                {% if contribution.status == 'PENDING' %}
+                                                <form action="{% url 'contributions:approve' contribution.pk %}" method="POST" class="w-full">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="inline-flex w-full justify-center rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500">Approve</button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="py-12 text-center text-sm text-slate-500">
-                                <h3 class="mt-2 text-sm font-semibold text-slate-900">No contributions found</h3>
-                                <p class="mt-1 text-sm text-slate-500">Start securing deposits.</p>
-                                <div class="mt-6">
-                                    {% url 'contributions:coop_add' as add_url %}
-                                    {% include "components/button.html" with type="primary" text="Record First Deposit" url=add_url %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+                            </template>
+                            {% endif %}
+
+                            {% if contribution.status == 'PENDING' %}
+                            <form action="{% url 'contributions:approve' contribution.pk %}" method="POST" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-emerald-600 hover:text-emerald-900 bg-emerald-50 px-2 py-1 rounded">Approve</button>
+                            </form>
+                            <form action="{% url 'contributions:reject' contribution.pk %}" method="POST" class="inline">
+                                {% csrf_token %}
+                                <button type="submit" class="text-rose-600 hover:text-rose-900 bg-rose-50 px-2 py-1 rounded">Reject</button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="py-12 text-center text-sm text-slate-500">
+                        <h3 class="mt-2 text-sm font-semibold text-slate-900">No contributions found</h3>
+                        <p class="mt-1 text-sm text-slate-500">Start securing deposits.</p>
+                        <div class="mt-6">
+                            {% url 'contributions:coop_add' as add_url %}
+                            {% include "components/button.html" with type="primary" text="Record First Deposit" url=add_url %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

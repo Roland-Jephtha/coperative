@@ -13,6 +13,9 @@ def home_redirect(request):
     
     return render(request, 'landing.html')
 
+from django.conf import settings
+from django.conf.urls.static import static
+
 urlpatterns = [
     path('sys-admin/', admin.site.urls), # Standard django admin moved
     path('accounts/', include('apps.accounts.urls')),
@@ -27,3 +30,6 @@ urlpatterns = [
     # Other apps will be included when needed
     path('', home_redirect, name='home'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -87,14 +87,7 @@
                                 Overview
                             </a>
                         </li>
-                        <li>
-                            <a href="{% url 'accounts:profile' %}" class="{% if request.resolver_match.view_name == 'accounts:profile' %}bg-slate-50 text-primary-600{% else %}text-slate-700 hover:text-primary-600 hover:bg-slate-50{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-colors">
-                                <svg class="h-6 w-6 shrink-0 {% if request.resolver_match.view_name == 'accounts:profile' %}text-primary-600{% else %}text-slate-400 group-hover:text-primary-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                                </svg>
-                                My Profile
-                            </a>
-                        </li>
+               
                         <li>
                             <a href="{% url 'contributions:member_list' %}" class="{% if 'contributions' in request.resolver_match.view_name %}bg-slate-50 text-primary-600{% else %}text-slate-700 hover:text-primary-600 hover:bg-slate-50{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-colors">
                                 <svg class="h-6 w-6 shrink-0 {% if 'contributions' in request.resolver_match.view_name %}text-primary-600{% else %}text-slate-400 group-hover:text-primary-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -111,14 +104,23 @@
                                 My Loans
                             </a>
                         </li>
-                        <li>
+
+                                 <li>
+                            <a href="{% url 'accounts:profile' %}" class="{% if request.resolver_match.view_name == 'accounts:profile' %}bg-slate-50 text-primary-600{% else %}text-slate-700 hover:text-primary-600 hover:bg-slate-50{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-colors">
+                                <svg class="h-6 w-6 shrink-0 {% if request.resolver_match.view_name == 'accounts:profile' %}text-primary-600{% else %}text-slate-400 group-hover:text-primary-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                                </svg>
+                                My Profile
+                            </a>
+                        </li>
+                        {% comment %} <li>
                             <a href="{% url 'announcements:coop_list' %}" class="{% if 'announcements' in request.resolver_match.app_name %}bg-slate-50 text-primary-600{% else %}text-slate-700 hover:text-primary-600 hover:bg-slate-50{% endif %} group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-medium transition-colors">
                                 <svg class="h-6 w-6 shrink-0 {% if 'announcements' in request.resolver_match.app_name %}text-primary-600{% else %}text-slate-400 group-hover:text-primary-600{% endif %}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.121-2.082-.182C5.905 15.36 3 12.597 3 9.775V9A6.75 6.75 0 019.75 2.25h.5A6.75 6.75 0 0117 9v.775c0 2.822-2.904 5.584-5.258 5.883m-1.402 3.161c-1.35.158-2.704.298-4.062.42A42.126 42.126 0 013 18.75v-1.125a1.5 1.5 0 011.5-1.5h15.25c.828 0 1.5.672 1.5 1.5v1.125c0 1.157-.311 2.279-.882 3.25-.568-.962-1.31-1.847-2.18-2.618M11.25 10.5v2.25m0 0h2.25m-2.25 0H9" />
                                 </svg>
                                 Announcements
                             </a>
-                        </li>
+                        </li> {% endcomment %}
                         {% endif %}
                     </ul>
                 </li>

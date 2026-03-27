@@ -8,14 +8,45 @@
     </div>
 </div>
 
-<form method="POST" class="space-y-8">
+{% if messages %}
+<div class="mb-6 space-y-2">
+    {% for message in messages %}
+    <div class="p-4 rounded-xl {% if message.tags == 'success' %}bg-green-50 text-green-700 border border-green-200{% else %}bg-amber-50 text-amber-700 border border-amber-200{% endif %} text-sm font-medium flex items-center gap-3">
+        {% if message.tags == 'success' %}
+        <svg class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        {% else %}
+        <svg class="h-5 w-5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+        {% endif %}
+        {{ message }}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if form.errors %}
+<div class="mb-6 p-4 rounded-xl bg-red-50 text-red-700 border border-red-200 text-sm">
+    <div class="flex items-center gap-3 font-bold mb-2">
+        <svg class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" /></svg>
+        Please correct the following errors:
+    </div>
+    <ul class="list-disc list-inside space-y-1 ml-8">
+        {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form method="POST" class="space-y-8 pb-20">
     {% csrf_token %}
     
     <!-- Bank Details Section -->
     <div class="bg-white shadow rounded-xl overflow-hidden border border-slate-200">
         <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
             <h3 class="text-lg font-semibold text-slate-900">Bank Information</h3>
-            <p class="text-sm text-slate-500 text-sm">Where members should transfer their savings and repayments.</p>
+            <p class="text-sm text-slate-500">Where members should transfer their savings and repayments.</p>
         </div>
         <div class="p-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <div>
@@ -33,7 +64,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
         <!-- Savings Rules -->
         <div class="bg-white shadow rounded-xl overflow-hidden border border-slate-200">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
@@ -63,7 +94,7 @@
             </div>
         </div>
 
-        <!-- Loan Rules -->
+        <!-- Loan Interest & Eligibility -->
         <div class="bg-white shadow rounded-xl overflow-hidden border border-slate-200">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
                 <h3 class="text-lg font-semibold text-slate-900">Loan Interest & Eligibility</h3>
@@ -83,11 +114,73 @@
                         </select>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Min Contribution Months</label>
-                    <input type="number" name="min_contribution_months_required" value="{{ form.min_contribution_months_required.value }}" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Eligibility Rule</label>
+                        <select name="loan_eligibility_type" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                            {% for val, label in form.fields.loan_eligibility_type.choices %}
+                            <option value="{{ val }}" {% if form.loan_eligibility_type.value == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Min Contribution Months</label>
+                        <input type="number" name="min_contribution_months_required" value="{{ form.min_contribution_months_required.value }}" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Repayment Frequency</label>
+                        <select name="repayment_frequency" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                            {% for val, label in form.fields.repayment_frequency.choices %}
+                            <option value="{{ val }}" {% if form.repayment_frequency.value == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Grace Period (Days)</label>
+                        <input type="number" name="grace_period_days" value="{{ form.grace_period_days.value }}" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loan Limits & Duration -->
+        <div class="bg-white shadow rounded-xl overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
+                <h3 class="text-lg font-semibold text-slate-900">Loan Limits & Duration</h3>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Min Loan (₦)</label>
+                        <input type="number" name="min_loan_amount" value="{{ form.min_loan_amount.value }}" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Max Loan (₦)</label>
+                        <input type="number" name="max_loan_amount" value="{{ form.max_loan_amount.value }}" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Min Duration (Months)</label>
+                        <input type="number" name="min_loan_duration_months" value="{{ form.min_loan_duration_months.value }}" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Max Duration (Months)</label>
+                        <input type="number" name="max_loan_duration_months" value="{{ form.max_loan_duration_months.value }}" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Penalties & Repayment -->
+        <div class="bg-white shadow rounded-xl overflow-hidden border border-slate-200">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50">
+                <h3 class="text-lg font-semibold text-slate-900">Penalties & Repayment</h3>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Penalty Type</label>
                         <select name="penalty_type" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
@@ -97,10 +190,77 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Penalty Value</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Value</label>
                         <input type="number" step="0.01" name="penalty_value" value="{{ form.penalty_value.value }}" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
                     </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Frequency</label>
+                        <select name="penalty_frequency" class="block w-full rounded-lg border-slate-300 focus:ring-primary-600 focus:border-primary-600 sm:text-sm">
+                            {% for val, label in form.fields.penalty_frequency.choices %}
+                            <option value="{{ val }}" {% if form.penalty_frequency.value == val %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
+                <div class="flex items-center gap-6 pt-4 border-t border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="allow_early_repayment" id="id_allow_early_repayment" {% if form.allow_early_repayment.value %}checked{% endif %} class="h-4 w-4 text-primary-600 focus:ring-primary-600 border-slate-300 rounded">
+                        <label for="id_allow_early_repayment" class="text-sm font-medium text-slate-700">Allow early repayment</label>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" name="apply_early_repayment_discount" id="id_apply_early_repayment_discount" {% if form.apply_early_repayment_discount.value %}checked{% endif %} class="h-4 w-4 text-primary-600 focus:ring-primary-600 border-slate-300 rounded">
+                        <label for="id_apply_early_repayment_discount" class="text-sm font-medium text-slate-700">Apply discount</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Preferences Section -->
+    <div class="bg-white shadow rounded-xl overflow-hidden border border-slate-200 mt-8 transition-all hover:shadow-md">
+        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-slate-900">Notification Preferences</h3>
+                <p class="text-sm text-slate-500">Enable or disable various communication channels for this cooperative.</p>
+            </div>
+            <div class="flex items-center gap-2 px-3 py-1 bg-primary-50 rounded-full border border-primary-100">
+                <div class="w-2 h-2 rounded-full bg-primary-500 animate-pulse"></div>
+                <span class="text-xs font-semibold text-primary-700 uppercase">Live Updates</span>
+            </div>
+        </div>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 transition-all hover:bg-slate-100">
+                <div class="flex flex-col">
+                    <span class="text-sm font-semibold text-slate-900">Email Alerts</span>
+                    <span class="text-[11px] text-slate-500">Transactional receipts and updates</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="email_notifications" {% if form.email_notifications.value %}checked{% endif %} class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none ring-0 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 transition-all hover:bg-slate-100">
+                <div class="flex flex-col">
+                    <span class="text-sm font-semibold text-slate-900">In-App Notifications</span>
+                    <span class="text-[11px] text-slate-500">Real-time alerts on dashboard</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="in_app_notifications" {% if form.in_app_notifications.value %}checked{% endif %} class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none ring-0 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200 opacity-60">
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold text-slate-900">SMS Notifications</span>
+                        <span class="text-[9px] bg-primary-100 text-primary-700 px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wider">Coming Soon</span>
+                    </div>
+                    <span class="text-[11px] text-slate-500">Direct mobile communication</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-not-allowed">
+                    <input type="checkbox" name="sms_notifications" disabled class="sr-only peer">
+                    <div class="w-11 h-6 bg-slate-200 ring-0 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                </label>
             </div>
         </div>
     </div>

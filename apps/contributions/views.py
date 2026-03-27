@@ -64,8 +64,15 @@ class MemberContributionsView(LoginRequiredMixin, MemberRequiredMixin, ListView)
 class MemberContributionCreateView(LoginRequiredMixin, MemberRequiredMixin, CreateView):
     model = Contribution
     template_name = 'member/add_savings.html'
-    fields = ['amount', 'notes'] # Simplified for members
+    fields = ['amount', 'notes', 'proof_of_payment']
     success_url = reverse_lazy('contributions:member_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['settings'] = getattr(self.request.user.cooperative, 'settings', None)
+        context['title'] = 'Add Savings'
+        context['description'] = 'Record a new savings deposit to your ledger.'
+        return context
 
     def form_valid(self, form):
         form.instance.member = self.request.user
